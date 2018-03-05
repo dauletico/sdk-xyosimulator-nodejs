@@ -4,7 +4,7 @@
  * @Email:  developer@xyfindables.com
  * @Filename: Sentinel.js
  * @Last modified by:   arietrouw
- * @Last modified time: Friday, March 2, 2018 12:48 AM
+ * @Last modified time: Sunday, March 4, 2018 6:19 PM
  * @License: All Rights Reserved
  * @Copyright: Copyright XY | The Findables Company
  */
@@ -13,7 +13,7 @@
 
 const debug = require("debug")("Sentinel"),
   Node = require("./Node.js"),
-  XYODATA = require("../../xyodata.js");
+  XYO = require("../../xyo.js");
 
 class Sentinel extends Node {
 
@@ -70,14 +70,14 @@ class Sentinel extends Node {
     let peer = Math.floor(Math.random() * 10);
 
     if (peer < this.peers.length) {
-      let id, buffer, entry = new XYODATA.Entry();
+      let id, buffer, entry = new XYO.DATA.Entry();
 
       entry.p2keys = [];
       for (let i = 0; i < this.keys.length; i++) {
         entry.p2keys.push(this.keys[i].exportKey('components-public').n);
       }
 
-      id = new XYODATA.Id();
+      id = new XYO.DATA.Id();
 
       if (!id) {
         throw new Error("Missing Id");
@@ -95,7 +95,7 @@ class Sentinel extends Node {
     let bridge = Math.floor(Math.random() * 10);
 
     if (bridge < this.bridges.length) {
-      let buffer, entry = new XYODATA.Entry();
+      let buffer, entry = new XYO.DATA.Entry();
 
       entry.p2keys = [];
 

@@ -4,16 +4,16 @@
  * @Email:  developer@xyfindables.com
  * @Filename: index.js
  * @Last modified by:   arietrouw
- * @Last modified time: Friday, March 2, 2018 12:55 AM
+ * @Last modified time: Sunday, March 4, 2018 6:26 PM
  * @License: All Rights Reserved
  * @Copyright: Copyright XY | The Findables Company
  */
 
 'use strict';
 let debug = require('debug')('xyo-node'),
-  XYO = require('./xyo.js'),
   CONFIG = require('config'),
-  TESTDATACLASSES = require('./testdataclasses.js');
+  TESTDATACLASSES = require('./testdataclasses.js'),
+  XYO = require('./xyo.js');
 
 /* ================= */
 /*  Local Functions  */
@@ -78,14 +78,14 @@ const initialize = (complete) => {
 
   },
   updateObjects = () => {
-    debug(`>>>>>>>>TIMER<<<<<<<<< [${Object.keys(XYO.fromMoniker).length}]`);
+    debug(`>>>>>>>>TIMER<<<<<<<<< [${Object.keys(XYO.COMPONENTS.Node.fromMoniker).length}]`);
     let key;
 
     XYO.Base.updateCount++;
 
-    for (key in XYO.fromMoniker) {
-      if (XYO.fromMoniker.hasOwnProperty(key)) {
-        XYO.fromMoniker[key].update(CONFIG);
+    for (key in XYO.COMPONENTS.Node.fromMoniker) {
+      if (XYO.COMPONENTS.Node.fromMoniker.hasOwnProperty(key)) {
+        XYO.COMPONENTS.Node.fromMoniker[key].update(CONFIG);
       }
     }
   },

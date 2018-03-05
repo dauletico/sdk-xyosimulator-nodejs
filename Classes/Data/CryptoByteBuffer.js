@@ -4,14 +4,15 @@
  * @Email:  developer@xyfindables.com
  * @Filename: CryptoByteBuffer.js
  * @Last modified by:   arietrouw
- * @Last modified time: Friday, March 2, 2018 8:24 AM
+ * @Last modified time: Sunday, March 4, 2018 5:34 PM
  * @License: All Rights Reserved
  * @Copyright: Copyright XY | The Findables Company
  */
 
 'use strict';
 
-const ByteBuffer = require('bytebuffer'),
+const debug = require('debug')('CryptoByteBuffer'),
+  ByteBuffer = require('bytebuffer'),
   bigInt = require('big-integer');
 
 class CryptoByteBuffer extends ByteBuffer {
@@ -33,7 +34,7 @@ class CryptoByteBuffer extends ByteBuffer {
   }
 
   readUInt256() {
-    
+
   }
 
   writeBufferArray(value) {
@@ -54,6 +55,8 @@ CryptoByteBuffer.wrap = (buffer, encoding, littleEndian, noAssert) => {
   cbb.limit = bb.byteLength;
 
   return cbb;
-}
+};
+
+debug("load");
 
 module.exports = CryptoByteBuffer;

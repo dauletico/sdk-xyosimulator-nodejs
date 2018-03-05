@@ -4,7 +4,7 @@
  * @Email:  developer@xyfindables.com
  * @Filename: Query.js
  * @Last modified by:   arietrouw
- * @Last modified time: Saturday, March 3, 2018 6:28 PM
+ * @Last modified time: Sunday, March 4, 2018 5:33 PM
  * @License: All Rights Reserved
  * @Copyright: Copyright XY | The Findables Company
  */
@@ -55,7 +55,9 @@ Query.fromArray = (array) => {
   query.epoch = array[5];
 
   return query;
-}
+};
+
+debug("load");
 
 Simple.classMap[0x1006] = Query;
 

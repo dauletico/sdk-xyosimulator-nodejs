@@ -4,7 +4,7 @@
  * @Email:  developer@xyfindables.com
  * @Filename: testdataclasses.js
  * @Last modified by:   arietrouw
- * @Last modified time: Friday, March 2, 2018 1:26 AM
+ * @Last modified time: Sunday, March 4, 2018 6:29 PM
  * @License: All Rights Reserved
  * @Copyright: Copyright XY | The Findables Company
  */
@@ -12,7 +12,6 @@
 "use strict";
 const debug = require("debug")("testsataclasses"),
   TestDataClasses = {},
-  XYODATA = require("./xyodata.js"),
   XYO = require("./xyo.js");
 
 TestDataClasses.All = () => {
@@ -21,16 +20,16 @@ TestDataClasses.All = () => {
   debug("*      Testing Data Classes       *");
   debug("***********************************");
 
-  let simple = new XYODATA.Simple(),
-    entry = new XYODATA.Entry(),
-    node = new XYO.Node('test', 'localhost', {
+  let simple = new XYO.DATA.Simple(),
+    entry = new XYO.DATA.Entry(),
+    node = new XYO.COMPONENTS.Node('test', 'localhost', {
       api: 8080,
       pipe: 8088
     }, {}),
     b0, b2,
     res0, res2;
 
-  entry.payload = (new XYODATA.Id()).toBuffer();
+  entry.payload = (new XYO.DATA.Id()).toBuffer();
 
   entry.p2keys = [];
   for (let i = 0; i < node.keys.length; i++) {
@@ -54,12 +53,12 @@ TestDataClasses.All = () => {
   debug(b2);
 
   debug("* ===== B2O Testing 'simple' ===== *");
-  res0 = XYODATA.Simple.fromBuffer(b0);
-  debug(JSON.stringify(res0.obj));
+  res0 = XYO.DATA.Simple.fromBuffer(b0);
+  debug(JSON.stringify(res0));
 
   debug("* ===== B2O Testing 'entry' ===== * ", b2.length);
-  res2 = XYODATA.Simple.fromBuffer(b2);
-  debug(JSON.stringify(res2.obj));
+  res2 = XYO.DATA.Simple.fromBuffer(b2);
+  debug(JSON.stringify(res2));
 
 };
 

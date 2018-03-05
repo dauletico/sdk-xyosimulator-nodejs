@@ -4,7 +4,7 @@
  * @Email:  developer@xyfindables.com
  * @Filename: Node.js
  * @Last modified by:   arietrouw
- * @Last modified time: Saturday, March 3, 2018 4:53 PM
+ * @Last modified time: Sunday, March 4, 2018 6:19 PM
  * @License: All Rights Reserved
  * @Copyright: Copyright XY | The Findables Company
  */
@@ -18,7 +18,7 @@ const debug = require('debug')('Node'),
   format = require('string-format'),
   NodeRSA = require('node-rsa'),
   NET = require('net'),
-  XYODATA = require('../../xyodata.js');
+  XYO = require('../../xyo.js');
 
 class Node extends Base {
 
@@ -120,7 +120,7 @@ class Node extends Base {
       if (inData.length >= 4) {
         debug('in:data: checking: ', buffer);
 
-        result = XYODATA.Simple.fromBuffer(inData);
+        result = XYO.Simple.fromBuffer(inData);
         if (result.obj) {
           let obj = result.obj;
 
@@ -191,7 +191,7 @@ class Node extends Base {
         inData = data;
       }
 
-      result = XYODATA.Simple.fromBuffer(inData);
+      result = XYO.Simple.fromBuffer(inData);
 
       if (result.obj) {
         let obj = result.obj;

@@ -4,7 +4,7 @@
  * @Email:  developer@xyfindables.com
  * @Filename: Simple.js
  * @Last modified by:   arietrouw
- * @Last modified time: Friday, March 2, 2018 8:23 AM
+ * @Last modified time: Sunday, March 4, 2018 5:35 PM
  * @License: All Rights Reserved
  * @Copyright: Copyright XY | The Findables Company
  */
@@ -76,5 +76,7 @@ class Simple extends Base {
 
 Simple.classMap = {};
 Simple.classMap[0x1001] = Simple;
+
+debug("load");
 
 module.exports = Simple;

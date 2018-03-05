@@ -4,7 +4,7 @@
  * @Email:  developer@xyfindables.com
  * @Filename: Entry.js
  * @Last modified by:   arietrouw
- * @Last modified time: Friday, March 2, 2018 1:15 AM
+ * @Last modified time: Sunday, March 4, 2018 5:34 PM
  * @License: All Rights Reserved
  * @Copyright: Copyright XY | The Findables Company
  */
@@ -117,6 +117,8 @@ class Entry extends Simple {
     return this;
   }
 }
+
+debug("load");
 
 Simple.classMap[0x1005] = Entry;
 

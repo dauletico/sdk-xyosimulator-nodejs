@@ -4,7 +4,7 @@
  * @Email:  developer@xyfindables.com
  * @Filename: Location.js
  * @Last modified by:   arietrouw
- * @Last modified time: Friday, March 2, 2018 12:44 AM
+ * @Last modified time: Sunday, March 4, 2018 5:33 PM
  * @License: All Rights Reserved
  * @Copyright: Copyright XY | The Findables Company
  */
@@ -47,6 +47,8 @@ class Location extends Simple {
   }
 
 }
+
+debug("load");
 
 Simple.classMap[0x1004] = Location;
 
