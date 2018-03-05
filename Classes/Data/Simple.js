@@ -4,7 +4,7 @@
  * @Email:  developer@xyfindables.com
  * @Filename: Simple.js
  * @Last modified by:   arietrouw
- * @Last modified time: Sunday, March 4, 2018 5:35 PM
+ * @Last modified time: Sunday, March 4, 2018 8:58 PM
  * @License: All Rights Reserved
  * @Copyright: Copyright XY | The Findables Company
  */
@@ -65,9 +65,7 @@ class Simple extends Base {
     return new Simple.classMap[type](byteBuffer);
   }
 
-  fromBuffer(buffer) {
-    let byteBuffer = CryptoByteBuffer.wrap(buffer);
-
+  fromBuffer(byteBuffer) {
     byteBuffer.clear();
     this.type = byteBuffer.readUInt16();
     return this;

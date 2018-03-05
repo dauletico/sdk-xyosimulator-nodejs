@@ -4,7 +4,7 @@
  * @Email:  developer@xyfindables.com
  * @Filename: testdataclasses.js
  * @Last modified by:   arietrouw
- * @Last modified time: Sunday, March 4, 2018 6:29 PM
+ * @Last modified time: Sunday, March 4, 2018 9:42 PM
  * @License: All Rights Reserved
  * @Copyright: Copyright XY | The Findables Company
  */
@@ -40,9 +40,9 @@ TestDataClasses.All = () => {
     return node.sign(payload);
   }, () => {});
 
-  /* entry.p2Sign((payload) => {
+  entry.p2Sign((payload) => {
     return node.sign(payload);
-  }, () => {}); */
+  }, () => {});
 
   debug("* ===== O2B Testing 'simple' ===== *");
   b0 = simple.toBuffer();
@@ -56,7 +56,7 @@ TestDataClasses.All = () => {
   res0 = XYO.DATA.Simple.fromBuffer(b0);
   debug(JSON.stringify(res0));
 
-  debug("* ===== B2O Testing 'entry' ===== * ", b2.length);
+  debug("* ===== B2O Testing 'entry' ===== * ", b2);
   res2 = XYO.DATA.Simple.fromBuffer(b2);
   debug(JSON.stringify(res2));
 

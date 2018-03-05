@@ -4,7 +4,7 @@
  * @Email:  developer@xyfindables.com
  * @Filename: Entry.js
  * @Last modified by:   arietrouw
- * @Last modified time: Sunday, March 4, 2018 5:34 PM
+ * @Last modified time: Sunday, March 4, 2018 9:38 PM
  * @License: All Rights Reserved
  * @Copyright: Copyright XY | The Findables Company
  */
@@ -108,7 +108,7 @@ class Entry extends Simple {
     this.p1keys = byteBuffer.readBufferArray();
     this.p2keys = byteBuffer.readBufferArray();
     this.p2signatures = byteBuffer.readBufferArray();
-    this.p1signatures = buffer.readBufferArray();
+    this.p1signatures = byteBuffer.readBufferArray();
     this.headKeys = byteBuffer.readBufferArray();
     this.tailKeys = byteBuffer.readBufferArray();
     this.headSignatures = byteBuffer.readBufferArray();
