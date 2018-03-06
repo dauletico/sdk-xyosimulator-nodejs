@@ -4,26 +4,23 @@
  * @Email:  developer@xyfindables.com
  * @Filename: Node.js
  * @Last modified by:   arietrouw
- * @Last modified time: Tuesday, March 6, 2018 3:08 PM
+ * @Last modified time: Tuesday, March 6, 2018 3:35 PM
  * @License: All Rights Reserved
  * @Copyright: Copyright XY | The Findables Company
  */
 
-'use strict';
 
-const debug = require('debug')('Node'),
-  Base = require('../Base'),
-  Express = require('express'),
-  bodyParser = require('body-parser'),
-  format = require('string-format'),
-  NodeRSA = require('node-rsa'),
-  NET = require('net'),
-  XYO = require('../../xyo.js');
+const debug = require(`debug`)(`Node`),
+  Base = require(`../Base`),
+  Express = require(`express`),
+  bodyParser = require(`body-parser`),
+  NodeRSA = require(`node-rsa`),
+  NET = require(`net`),
+  XYO = require(`../../xyo.js`);
 
 class Node extends Base {
-
   constructor(moniker, host, ports, config) {
-    debug('constructor');
+    debug(`constructor`);
 
     super();
     this.moniker = moniker;
@@ -47,38 +44,38 @@ class Node extends Base {
     this.initKeys(3);
     this.app.use(bodyParser.json());
     this.app.use((req, res, next) => {
-      res.header("Access-Control-Allow-Origin", "*");
-      res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+      res.header(`Access-Control-Allow-Origin`, `*`);
+      res.header(`Access-Control-Allow-Headers`, `Origin, X-Requested-With, Content-Type, Accept`);
       next();
     });
-    this.app.get('*', (req, res) => {
+    this.app.get(`*`, (req, res) => {
       this.get(req, res);
     });
-    this.app.post('*', (req, res) => {
+    this.app.post(`*`, (req, res) => {
       if (!(req.body)) {
-        return res.status(400).send("Empty body not allowed");
+        return res.status(400).send(`Empty body not allowed`);
       }
       this.post(req, res);
     });
   }
 
   get(req, res) {
-    debug('get');
-    let contentType = req.headers['content-type'],
-      pathParts = req.path.split("/");
+    debug(`get`);
+    let contentType = req.headers[`content-type`],
+      pathParts = req.path.split(`/`);
 
     if (contentType && pathParts.length > 1) {
-      let action = pathParts[1];
+      const action = pathParts[1];
 
       switch (contentType) {
-        case 'application/json':
+        case `application/json`:
           switch (action) {
-            case "status":
+            case `status`:
               return this.returnJSONStatus(req, res);
-            case "entries":
+            case `entries`:
               return this.returnJSONEntries(req, res);
             default:
-              return res.status(404).send(format("({}) Not Found", req.path));
+              return res.status(404).send(`({req.path}) Not Found`);
           }
         default:
           return res.status(415).send(req.path);
@@ -88,27 +85,26 @@ class Node extends Base {
   }
 
   post(req, res) {
-    debug('post');
-    let contentType = req.headers['content-type'];
+    debug(`post`);
+    const contentType = req.headers[`content-type`];
 
     if (!contentType) {
       return res.status(415).send(req.path);
-    } else {
-      switch (contentType) {
-        case 'application/json':
-          return this.returnJSONStatus(req, res);
-        default:
-          return res.status(415).send(req.path);
-      }
+    }
+    switch (contentType) {
+      case `application/json`:
+        return this.returnJSONStatus(req, res);
+      default:
+        return res.status(415).send(req.path);
     }
   }
 
   in(socket) {
-    debug('in');
+    debug(`in`);
     let inData = null;
 
-    socket.on('data', (buffer) => {
-      debug('in:data: ', buffer.length);
+    socket.on(`data`, (buffer) => {
+      debug(`in:data: `, buffer.length);
       let result;
 
       if (inData) {
@@ -118,14 +114,14 @@ class Node extends Base {
       }
 
       if (inData.length >= 4) {
-        debug('in:data: checking: ', buffer);
+        debug(`in:data: checking: `, buffer);
 
         result = XYO.Simple.fromBuffer(inData);
         if (result.obj) {
-          let obj = result.obj;
+          const obj = result.obj;
 
           switch (obj.map) {
-            case "entry":
+            case `entry`:
               this.onEntry(socket, obj);
               break;
             default:
@@ -133,56 +129,56 @@ class Node extends Base {
           }
           inData = null;
         } else {
-          debug('in:noobj');
+          debug(`in:noobj`);
         }
       } else {
-        debug('waiting:{}', inData.length);
+        debug(`waiting:{}`, inData.length);
       }
-    }).on('close', () => {
-      debug('in:close');
-    }).on('end', () => {
-      debug('in:end');
+    }).on(`close`, () => {
+      debug(`in:close`);
+    }).on(`end`, () => {
+      debug(`in:end`);
     });
   }
 
   onEntry(socket, entry) {
-    debug(format("onEntry: {}"));
-    let self = this;
+    debug(`onEntry: {}`);
+    const self = this;
 
     if (entry.p1signatures.length === 0) {
-      debug("onEntry: P1");
+      debug(`onEntry: P1`);
       entry.p1Sign((payload) => {
-        let signatures = self.sign(payload);
+        const signatures = self.sign(payload);
 
         return signatures;
       }, () => {
-        let buffer = entry.toBuffer();
+        const buffer = entry.toBuffer();
 
         socket.write(buffer);
       });
     } else if (entry.p2signatures.length === 0) {
-      debug("onEntry: P2");
-      entry.p2Sign((payload) => {
-        return self.sign(payload);
-      },
-      () => {
-        let buffer = entry.toBuffer();
+      debug(`onEntry: P2`);
+      entry.p2Sign(
+        payload => self.sign(payload),
+        () => {
+          const buffer = entry.toBuffer();
 
-        socket.write(buffer);
-        this.addEntryToLedger(entry);
-      });
+          socket.write(buffer);
+          this.addEntryToLedger(entry);
+        },
+      );
     } else {
-      debug("onEntry: DONE");
+      debug(`onEntry: DONE`);
       this.addEntryToLedger(entry);
     }
   }
 
   out(target, buffer) {
-    debug(format('out: {},{},{}', target.host, target.port, buffer.length));
+    debug(`out: ${target.host},${target.port},${buffer.length}`);
     let inData = null,
       socket = NET.createConnection(target.port, target.host);
 
-    socket.on('data', (data) => {
+    socket.on(`data`, (data) => {
       let result;
 
       if (inData) {
@@ -194,10 +190,10 @@ class Node extends Base {
       result = XYO.Simple.fromBuffer(inData);
 
       if (result.obj) {
-        let obj = result.obj;
+        const obj = result.obj;
 
         switch (obj.map) {
-          case "entry":
+          case `entry`:
             this.onEntry(socket, obj);
             break;
           default:
@@ -205,39 +201,39 @@ class Node extends Base {
         }
         inData = null;
       }
-    }).on('connect', () => {
-      debug('out:connect');
+    }).on(`connect`, () => {
+      debug(`out:connect`);
       socket.write(buffer);
-    }).on('end', () => {
-      debug('out:done');
-    }).on('error', (ex) => {
-      debug(format('error:{}', ex));
+    }).on(`end`, () => {
+      debug(`out:done`);
+    }).on(`error`, (ex) => {
+      debug(format(`error:{}`, ex));
     });
   }
 
   addPeer(host, ports) {
-    debug(format('addPeer[{}, {}]', host, ports.pipe));
+    debug(format(`addPeer[{}, {}]`, host, ports.pipe));
     if (!(this.host === host && this.ports.pipe === ports.pipe)) {
       this.peers.push({
-        host: host,
-        port: ports.pipe
+        host,
+        port: ports.pipe,
       });
     }
   }
 
   update() {
-    debug('update');
+    debug(`update`);
     Node.updateCount++;
   }
 
   shutdown() {
-    debug('shutdown');
+    debug(`shutdown`);
     delete Base.fromMoniker[this.moniker];
     delete Base.fromPort[this.port];
   }
 
   addEntryToLedger(entry) {
-    debug("addEntryToLedger");
+    debug(`addEntryToLedger`);
     if (this.entries.length > 0) {
       this.signHeadAndTail(this.entries[this.entries.length - 1]);
     }
@@ -245,8 +241,9 @@ class Node extends Base {
   }
 
   signHeadAndTail(entry) {
-    debug("signHeadAndTail");
-    let payload, headKeys = this.keys.slice(0);
+    debug(`signHeadAndTail`);
+    let payload,
+      headKeys = this.keys.slice(0);
 
     this.spinKeys();
 
@@ -260,7 +257,7 @@ class Node extends Base {
   }
 
   signHead(entry, payload, keys) {
-    debug("signHead");
+    debug(`signHead`);
     let result;
 
     result = this.sign(payload, keys);
@@ -268,7 +265,7 @@ class Node extends Base {
   }
 
   signTail(entry, payload, keys) {
-    debug("signTail");
+    debug(`signTail`);
     let result;
 
     result = this.sign(payload, keys);
@@ -276,17 +273,17 @@ class Node extends Base {
   }
 
   publicKeysFromKeys(keys) {
-    let publicKeys = [];
+    const publicKeys = [];
 
     for (let i = 0; i < keys.length; i++) {
-      publicKeys.push(keys[i].exportKey('components-public').n);
+      publicKeys.push(keys[i].exportKey(`components-public`).n);
     }
 
     return publicKeys;
   }
 
   initKeys(count) {
-    debug('initKeys');
+    debug(`initKeys`);
     this.keys = [];
     for (let i = 0; i < count; i++) {
       this.keys.push(new NodeRSA({ b: 512 }));
@@ -294,34 +291,35 @@ class Node extends Base {
   }
 
   sign(payload, signingKeys) {
-    debug('sign');
+    debug(`sign`);
     let keys = [],
-      signature, signatures = [],
+      signature,
+      signatures = [],
       signKeys = signingKeys || this.keys;
 
     for (let i = 0; i < signKeys.length; i++) {
       signature = signKeys[i].sign(payload);
-      debug(format('SIGLEN: {}', signature.length));
+      debug(format(`SIGLEN: {}`, signature.length));
       signatures.push(signature);
-      keys.push(signKeys[i].exportKey('components-public').n);
-      debug(format('sign: {},{}', i, signatures[i].length));
+      keys.push(signKeys[i].exportKey(`components-public`).n);
+      debug(format(`sign: {},{}`, i, signatures[i].length));
     }
     return {
-      signatures: signatures,
-      keys: keys
+      signatures,
+      keys,
     };
   }
 
   getKeyUses(index) {
-    debug('getKeyUses');
+    debug(`getKeyUses`);
     return (index + 1) * (index + 1);
   }
 
   // Add one to the use number of each key, and if they have been used too much, regenerate
   spinKeys() {
-    debug('spinkKeys');
+    debug(`spinkKeys`);
     for (let i = 0; i < this.keys.length; i++) {
-      let key = this.keys[i];
+      const key = this.keys[i];
 
       key.used += 1;
       if (key.used >= this.getKeyUses(i)) {
@@ -331,29 +329,29 @@ class Node extends Base {
   }
 
   status() {
-    debug('status');
+    debug(`status`);
     return {
-      'moniker': this.moniker,
-      'enabled': true,
-      'peers': this.peers.length,
-      'host': this.host,
-      'port': this.port,
-      'config': this.config,
-      'type': this.name,
-      'ledger': {
-        'entries': this.entries.length
-      }
+      moniker: this.moniker,
+      enabled: true,
+      peers: this.peers.length,
+      host: this.host,
+      port: this.port,
+      config: this.config,
+      type: this.name,
+      ledger: {
+        entries: this.entries.length,
+      },
     };
   }
 
   returnJSONStatus(req, res) {
-    debug('returnJSONStatus');
+    debug(`returnJSONStatus`);
     res.status(200).send(JSON.stringify(this.status()));
   }
 
   returnJSONEntries(req, res) {
-    debug('returnJSONItems');
-    let pathParts = req.path.split("/"),
+    debug(`returnJSONItems`);
+    let pathParts = req.path.split(`/`),
       id = null;
 
     if (pathParts.length > 2) {
@@ -361,27 +359,25 @@ class Node extends Base {
     }
 
     if (id && id.length > 0) {
-      let entries = [this.entriesByP1Key[id], this.entriesByP2Key[id], this.entriesByHeadKey[id], this.entriesByTailKey[id]];
+      const entries = [this.entriesByP1Key[id], this.entriesByP2Key[id], this.entriesByHeadKey[id], this.entriesByTailKey[id]];
 
       if (entries) {
         return res.send({
-          "id": id,
-          "entries": this.entriesByKey[id]
+          id,
+          entries: this.entriesByKey[id],
         });
       }
-      return res.status(404).send(format("({}) Not Found", id));
-    } else {
-      let results = [];
+      return res.status(404).send(format(`({}) Not Found`, id));
+    }
+    const results = [];
 
-      for (let i = 0; i < this.entries.length && i < 50; i++) {
-        results.push(this.entries[i]);
-      }
-
-      return res.send({
-        "entries": results
-      });
+    for (let i = 0; i < this.entries.length && i < 50; i++) {
+      results.push(this.entries[i]);
     }
 
+    return res.send({
+      entries: results,
+    });
   }
 }
 

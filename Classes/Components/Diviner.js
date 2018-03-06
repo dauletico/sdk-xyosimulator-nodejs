@@ -4,27 +4,24 @@
  * @Email:  developer@xyfindables.com
  * @Filename: Diviner.js
  * @Last modified by:   arietrouw
- * @Last modified time: Saturday, March 3, 2018 6:36 PM
+ * @Last modified time: Tuesday, March 6, 2018 3:34 PM
  * @License: All Rights Reserved
  * @Copyright: Copyright XY | The Findables Company
  */
 
-'use strict';
 
-const debug = require('debug')('Diviner'),
-  Node = require('./Node.js'),
-  HTTP = require('http'),
-  Query = require('../Data/Query.js'),
-  Web3 = require('web3'),
-  format = require('string-format'),
-  bigInt = require('big-integer'),
-  XYOSolidity = require('xyo-solidity');
+const debug = require(`debug`)(`Diviner`),
+  Node = require(`./Node.js`),
+  HTTP = require(`http`),
+  Query = require(`../Data/Query.js`),
+  Web3 = require(`web3`),
+  bigInt = require(`big-integer`),
+  XYOSolidity = require(`xyo-solidity`);
 
 class Diviner extends Node {
-
   constructor(moniker, host, ports, config) {
-    debug('constructor: ');
-    process.title = 'XYO-Diviner';
+    debug(`constructor: `);
+    process.title = `XYO-Diviner`;
     super(moniker, host, ports, config);
     this.archivists = [];
     this.pendingQueries = [];
@@ -43,52 +40,52 @@ class Diviner extends Node {
   }
 
   connectToEthereum(address) {
-    debug('connectToEthereum: ', address);
+    debug(`connectToEthereum: `, address);
     this.web3 = new Web3(new Web3.providers.HttpProvider(address));
 
-    debug('connectToEthereum[coinbase]: ', this.web3.eth.coinbase);
+    debug(`connectToEthereum[coinbase]: `, this.web3.eth.coinbase);
 
-    let filter = this.web3.eth.filter('latest');
+    const filter = this.web3.eth.filter(`latest`);
 
     filter.watch((error, result) => {
       if (error) {
-        debug('Error: ', error);
+        debug(`Error: `, error);
       } else {
-        debug('Watch: ', result);
+        debug(`Watch: `, result);
       }
     });
   }
 
   onEntry(socket, entry) {
-    debug('onEntry');
+    debug(`onEntry`);
     super.onEntry(socket, entry);
   }
 
   in(socket) {
-    debug('in');
+    debug(`in`);
     super.in(socket);
   }
 
   out(target, buffer) {
-    debug('out');
+    debug(`out`);
     super.out(target, buffer);
   }
 
   getUncalibratedContract() {
-    let compiled = new XYOSolidity().contracts.load('XYUncalibratedQuery.sol', 'XYUncalibratedQuery'),
+    let compiled = new XYOSolidity().contracts.load(`XYUncalibratedQuery.sol`, `XYUncalibratedQuery`),
       abi = JSON.parse(compiled.interface);
 
-    return { compiled: compiled, contract: this.web3.eth.contract(abi) };
+    return { compiled, contract: this.web3.eth.contract(abi) };
   }
 
   getPendingUncalibratedQueries(callback) {
-    debug('getPendingUncalibratedQueries');
+    debug(`getPendingUncalibratedQueries`);
     let xyContract = this.getUncalibratedContract(),
       xyInstance = xyContract.contract.at(this.uncalibratedContractAddress);
 
     xyInstance.pendingQueries(this.web3.eth.defaultAccount, (error, result) => {
       if (error) {
-        debug("Error: ", error);
+        debug(`Error: `, error);
         callback(error, null);
       } else {
         callback(null, Query.fromArray(result));
@@ -97,56 +94,56 @@ class Diviner extends Node {
   }
 
   createXYUncalibratedQueryContract() {
-    debug('createXYUncalibratedQueryContract');
-    let contract = this.getUncalibratedContract();
+    debug(`createXYUncalibratedQueryContract`);
+    const contract = this.getUncalibratedContract();
 
     contract.contract.new({
-      data: '0x' + contract.compiled.bytecode,
+      data: `0x${contract.compiled.bytecode}`,
       from: this.web3.eth.coinbase,
-      gas: 90000 * 10
+      gas: 90000 * 10,
     }, (err, res) => {
       if (err) {
-        debug('Error:', err);
+        debug(`Error:`, err);
         return;
       }
 
       // Log the tx, you can explore status with eth.getTransaction()
-      debug('TransactionHash: ', res.transactionHash);
+      debug(`TransactionHash: `, res.transactionHash);
 
       // If we have an address property, the contract was deployed
       if (res.address) {
-        debug('Contract address: ', res.address);
+        debug(`Contract address: `, res.address);
         this.xyUncalibratedQueryAddress = res.address;
       }
     });
   }
 
   query(question, callback) {
-    debug('query');
+    debug(`query`);
     this.findBlocks(question, (blocks) => {
       this.processBlocks(question, blocks, (answer) => {
         callback({
-          'success': (answer.accuracy >= question.accuracy && answer.certainty >= question.certainty),
-          'question': question,
-          'answer': answer,
-          'blocks': blocks
+          success: (answer.accuracy >= question.accuracy && answer.certainty >= question.certainty),
+          question,
+          answer,
+          blocks,
         });
       });
     });
   }
 
   get(req, res) {
-    debug('get');
-    let contentType = req.headers['content-type'],
-      pathParts = req.path.split('/');
+    debug(`get`);
+    let contentType = req.headers[`content-type`],
+      pathParts = req.path.split(`/`);
 
     if (contentType && pathParts.length > 1) {
-      let action = pathParts[1];
+      const action = pathParts[1];
 
       switch (contentType) {
-        case 'application/json':
+        case `application/json`:
           switch (action) {
-            case 'pending':
+            case `pending`:
               return this.returnJSONPending(req, res);
             default:
               return super.get(req, res);
@@ -159,17 +156,17 @@ class Diviner extends Node {
   }
 
   post(req, res) {
-    debug('post');
-    let contentType = req.headers['content-type'],
-      pathParts = req.path.split('/');
+    debug(`post`);
+    let contentType = req.headers[`content-type`],
+      pathParts = req.path.split(`/`);
 
     if (contentType) {
-      let action = pathParts[1];
+      const action = pathParts[1];
 
       switch (contentType) {
-        case 'application/json':
+        case `application/json`:
           switch (action) {
-            case 'query':
+            case `query`:
               return this.postQuery(req, res);
             default:
               break;
@@ -187,17 +184,17 @@ class Diviner extends Node {
   }
 
   processBlocks(question, blocks, callback) {
-    debug('processBlocks');
+    debug(`processBlocks`);
     callback(null, {});
   }
 
   findBlocks(pk, epoch, callback) {
-    debug('findBlocks');
+    debug(`findBlocks`);
     let count = this.archivist.length,
       blocks = [];
 
     this.archivists.forEach((archivist) => {
-      this.getBlock(pk, epoch, archivist, (err, block) => {
+      Diviner.getBlock(pk, epoch, archivist, (err, block) => {
         if (!err) {
           blocks.push(JSON.parse(block));
         }
@@ -209,20 +206,19 @@ class Diviner extends Node {
     });
   }
 
-  getBlock(pk, epoch, url, callback) {
-    debug('getBlock');
-    HTTP.get(url + format('/?key={}&epoch={}', pk, epoch), (resp) => {
-      let data = '';
+  static getBlock(pk, epoch, url, callback) {
+    debug(`getBlock`);
+    HTTP.get(`${url}/?key=${pk}&epoch=${epoch}`, (resp) => {
+      let data = ``;
 
-      resp.on('data', (chunk) => {
+      resp.on(`data`, (chunk) => {
         data += chunk;
       });
 
-      resp.on('end', () => {
+      resp.on(`end`, () => {
         callback(null, data);
       });
-
-    }).on('error', (err) => {
+    }).on(`error`, (err) => {
       callback(err, null);
     });
   }
@@ -230,59 +226,59 @@ class Diviner extends Node {
   getPending() {
     return {
       queries: [{
-        target: 'xxxxx',
-        bounty: 1
+        target: `xxxxx`,
+        bounty: 1,
       }, {
-        target: 'yyyyy',
-        bounty: 1
-      }]
+        target: `yyyyy`,
+        bounty: 1,
+      }],
     };
   }
 
   findPeers(diviners) {
-    debug('findPeers');
+    debug(`findPeers`);
     let key;
 
     for (key in diviners) {
-      let diviner = diviners[key];
+      const diviner = diviners[key];
 
       if (!(diviner.ports.pipe === this.ports.pipe && diviner.host === this.host)) {
         this.addPeer(
           diviner.host,
-          diviner.ports.pipe
+          diviner.ports.pipe,
         );
       }
     }
   }
 
   findArchivists(archivists) {
-    debug('findArchivists');
+    debug(`findArchivists`);
     let key;
 
     for (key in archivists) {
-      let archivist = archivists[key];
+      const archivist = archivists[key];
 
       if (!(archivist.ports.pipe === this.ports.pipe && archivist.host === this.host)) {
         this.addArchivist(
           archivist.host,
-          archivist.ports.pipe
+          archivist.ports.pipe,
         );
       }
     }
   }
 
   addArchivist(host, ports) {
-    debug('addArchivist');
+    debug(`addArchivist`);
     if (!(this.host === host && this.ports.pipe === ports.pipe)) {
       this.archivists.push({
-        host: host,
-        port: ports.pipe
+        host,
+        port: ports.pipe,
       });
     }
   }
 
   update(config) {
-    debug('update: ', Node.updateCount);
+    debug(`update: `, Node.updateCount);
     super.update(config);
     if (this.archivists.length === 0) {
       this.findArchivists(config.archivists);
@@ -296,15 +292,15 @@ class Diviner extends Node {
   }
 
   status() {
-    let status = super.status();
+    const status = super.status();
 
-    status.type = 'Diviner';
+    status.type = `Diviner`;
     status.archivists = this.archivists.length;
     return status;
   }
 
   returnJSONPending(req, res) {
-    debug('returnJSONPending');
+    debug(`returnJSONPending`);
     res.status(200).send(JSON.stringify(this.getPending()));
   }
 }
