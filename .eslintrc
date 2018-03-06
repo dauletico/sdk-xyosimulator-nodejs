@@ -1,27 +1,22 @@
 # @Author: XY | The Findables Company <arietrouw>
-# @Date:   Tuesday, February 27, 2018 9:50 AM
+# @Date:   Tuesday, January 23, 2018 9:36 AM
 # @Email:  developer@xyfindables.com
 # @Filename: .eslintrc
 # @Last modified by:   arietrouw
-# @Last modified time: Sunday, March 4, 2018 6:03 PM
+# @Last modified time: Tuesday, March 6, 2018 3:08 PM
 # @License: All Rights Reserved
 # @Copyright: Copyright XY | The Findables Company
 
-
-
 {
- "root": true,
- "env": {
-  "es6": true,
-  "node": true,
-  "browser": true
- },
- "parserOptions": {
-  "ecmaVersion": 6,
-  "sourceType": "module",
-  "ecmaFeatures": {
-   "jsx": true,
-   "experimentalObjectRestSpread": true
+  "extends": "airbnb",
+  "parser": "babel-eslint",
+  "env": {
+    "browser": true,
+    "node": true,
+    "es6": true,
+    "mocha": true
+  },
+  "rules": {
+    "func-names": 0
   }
- }
 }
