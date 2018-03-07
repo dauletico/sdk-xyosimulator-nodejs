@@ -4,22 +4,20 @@
  * @Email:  developer@xyfindables.com
  * @Filename: Archivist.js
  * @Last modified by:   arietrouw
- * @Last modified time: Thursday, March 1, 2018 6:18 PM
+ * @Last modified time: Tuesday, March 6, 2018 4:20 PM
  * @License: All Rights Reserved
  * @Copyright: Copyright XY | The Findables Company
  */
 
-'use strict';
 
-const debug = require('debug')('Archivist'),
-  Node = require('./Node.js');
+const debug = require(`debug`)(`Archivist`);
+const Node = require(`./Node.js`);
 
 class Archivist extends Node {
-
   constructor(moniker, host, ports, config) {
-    debug('constructor');
+    debug(`constructor`);
 
-    process.title = 'XYO-Archivist';
+    process.title = `XYO-Archivist`;
 
     super(moniker, host, ports, config);
     this.entriesByP1Key = {};
@@ -29,20 +27,20 @@ class Archivist extends Node {
   }
 
   get(req, res) {
-    debug('get');
+    debug(`get`);
     return super.get(req, res);
   }
 
   post(req, res) {
-    debug('post');
-    let action, entries;
+    debug(`post`);
+    let entries;
 
-    action = req.body.action;
+    const action = req.body.action;
 
     switch (action) {
-      case 'find':
+      case `find`:
         entries = this.find(req.body);
-        return res.status(200).send({ count: Object.keys(entries).length, entries: entries });
+        return res.status(200).send({ count: Object.keys(entries).length, entries });
       default:
         break;
     }
@@ -50,7 +48,7 @@ class Archivist extends Node {
   }
 
   find(config, entries) {
-    debug('find');
+    debug(`find`);
     let entryList = entries || {};
 
     config.keys.forEach((key) => {
@@ -87,30 +85,29 @@ class Archivist extends Node {
   }
 
   findPeers(archivists) {
-    debug('findPeers');
-    let key;
+    debug(`findPeers`);
 
-    for (key in archivists) {
-      let archivist = archivists[key];
+    Object.keys(archivists).forEach((key) => {
+      const archivist = archivists[key];
 
       this.addPeer(archivist.host, archivist.ports.pipe);
-    }
+    });
   }
 
   addEntryToLedger(entry) {
-    debug('addEntryToLedger');
+    debug(`addEntryToLedger`);
 
     if (entry.p1keys.length === 0) {
-      throw new Error('Trying to add entry to ledger without P1 keys');
+      throw new Error(`Trying to add entry to ledger without P1 keys`);
     }
     if (entry.p1signatures.length === 0) {
-      throw new Error('Trying to add entry to ledger without P1 signatures');
+      throw new Error(`Trying to add entry to ledger without P1 signatures`);
     }
     if (entry.p2keys.length === 0) {
-      throw new Error('Trying to add entry to ledger without P2 keys');
+      throw new Error(`Trying to add entry to ledger without P2 keys`);
     }
     if (entry.p2signatures.length === 0) {
-      throw new Error('Trying to add entry to ledger without P2 signatures');
+      throw new Error(`Trying to add entry to ledger without P2 signatures`);
     }
 
     super.addEntryToLedger(entry);
@@ -123,21 +120,21 @@ class Archivist extends Node {
   }
 
   signHeadAndTail(entry) {
-    debug('signHeadAndTail');
+    debug(`signHeadAndTail`);
 
     super.signHeadAndTail(entry);
 
     if (entry.headKeys.length === 0) {
-      throw new Error('Trying to index entry without Head keys');
+      throw new Error(`Trying to index entry without Head keys`);
     }
     if (entry.headSignatures.length === 0) {
-      throw new Error('Trying to index entry without Head signatures');
+      throw new Error(`Trying to index entry without Head signatures`);
     }
     if (entry.p2keys.length === 0) {
-      throw new Error('Trying to index entry without Tail keys');
+      throw new Error(`Trying to index entry without Tail keys`);
     }
     if (entry.p2signatures.length === 0) {
-      throw new Error('Trying to index entry without Tail signatures');
+      throw new Error(`Trying to index entry without Tail signatures`);
     }
 
     entry.headKeys.forEach((key) => {
@@ -149,34 +146,33 @@ class Archivist extends Node {
   }
 
   update(config) {
-    debug("update");
+    debug(`update`);
     super.update(config);
   }
 
   onEntry(socket, entry) {
-    debug('onEntry');
+    debug(`onEntry`);
     super.onEntry(socket, entry);
   }
 
   in(socket) {
-    debug('in');
+    debug(`in`);
     super.in(socket);
   }
 
   out(target, buffer) {
-    debug('out');
+    debug(`out`);
     super.out(target, buffer);
   }
 
   status() {
-    let status = super.status();
+    const status = super.status();
 
-    status.type = 'Archivist';
+    status.type = `Archivist`;
     status.entriesByKey = Object.keys(this.entriesByKey).length;
 
     return status;
   }
-
 }
 
 module.exports = Archivist;

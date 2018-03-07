@@ -12,7 +12,7 @@
 "use strict";
 const debug = require("debug")("testsataclasses"),
   TestDataClasses = {},
-  XYO = require("./xyo.js");
+  XYO = require("./xyo.server.js");
 
 TestDataClasses.All = () => {
 
@@ -20,16 +20,16 @@ TestDataClasses.All = () => {
   debug("*      Testing Data Classes       *");
   debug("***********************************");
 
-  let simple = new XYO.DATA.Simple(),
-    entry = new XYO.DATA.Entry(),
-    node = new XYO.COMPONENTS.Node('test', 'localhost', {
+  let simple = new XYO.SERVER.DATA.Simple(),
+    entry = new XYO.SERVER.DATA.Entry(),
+    node = new XYO.SERVER.COMPONENTS.Node('test', 'localhost', {
       api: 8080,
       pipe: 8088
     }, {}),
     b0, b2,
     res0, res2;
 
-  entry.payload = (new XYO.DATA.Id()).toBuffer();
+  entry.payload = (new XYO.SERVER.DATA.Id()).toBuffer();
 
   entry.p2keys = [];
   for (let i = 0; i < node.keys.length; i++) {
@@ -53,11 +53,11 @@ TestDataClasses.All = () => {
   debug(b2);
 
   debug("* ===== B2O Testing 'simple' ===== *");
-  res0 = XYO.DATA.Simple.fromBuffer(b0);
+  res0 = XYO.SERVER.DATA.Simple.fromBuffer(b0);
   debug(JSON.stringify(res0));
 
   debug("* ===== B2O Testing 'entry' ===== * ", b2);
-  res2 = XYO.DATA.Simple.fromBuffer(b2);
+  res2 = XYO.SERVER.DATA.Simple.fromBuffer(b2);
   debug(JSON.stringify(res2));
 
 };

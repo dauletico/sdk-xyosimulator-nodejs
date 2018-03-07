@@ -4,127 +4,122 @@
  * @Email:  developer@xyfindables.com
  * @Filename: Bridge.js
  * @Last modified by:   arietrouw
- * @Last modified time: Sunday, March 4, 2018 6:19 PM
+ * @Last modified time: Tuesday, March 6, 2018 4:19 PM
  * @License: All Rights Reserved
  * @Copyright: Copyright XY | The Findables Company
  */
 
-"use strict";
 
-const debug = require("debug")("Bridge"),
-  Node = require("./Node.js"),
-  XYO = require("../../xyo.js");
+const debug = require(`debug`)(`Bridge`);
+const Node = require(`./Node.js`);
+const XYO = require(`../../xyo.server.js`);
 
 class Bridge extends Node {
-
   constructor(moniker, host, ports, config) {
-    debug("constructor");
-    process.title = "XYO-Bridge";
+    debug(`constructor`);
+    process.title = `XYO-Bridge`;
     super(moniker, host, ports, config);
     this.sentinels = [];
     this.archivists = [];
   }
 
   findSentinels(sentinels) {
-    debug("findSentinels");
-    let key;
+    debug(`findSentinels`);
 
     this.sentinels = []; // remove old ones
-    for (key in sentinels) {
-      let sentinel = sentinels[key];
+    Object.keys(sentinels).forEach((key) => {
+      const sentinel = sentinels[key];
 
       if (!(sentinel.ports.pipe === this.ports.pipe && sentinel.host === this.host)) {
         this.addSentinel(
           sentinel.host,
-          sentinel.ports
+          sentinel.ports,
         );
       }
-    }
+    });
   }
 
   findArchivists(archivists) {
-    debug("findArchivists");
-    let key;
+    debug(`findArchivists`);
 
     this.archivists = []; // remove old ones
-    for (key in archivists) {
-      let archivist = archivists[key];
+    Object.keys(archivists).forEach((key) => {
+      const archivist = archivists[key];
 
       if (!(archivist.ports.pipe === this.ports.pipe && archivist.host === this.host)) {
         this.addArchivist(
           archivist.host,
-          archivist.ports
+          archivist.ports,
         );
       }
-    }
+    });
   }
 
   findBridges(bridges) {
-    debug("detectBridges");
-    let key;
+    debug(`detectBridges`);
 
     this.peers = []; // remove old ones
-    for (key in bridges) {
-      let bridge = bridges[key];
+    Object.keys(bridges).forEach((key) => {
+      const bridge = bridges[key];
 
       if (!(bridge.ports.pipe === this.ports.pipe && bridge.host === this.host)) {
         this.addPeer(
           bridge.host,
-          bridge.ports
+          bridge.ports,
         );
       }
-    }
+    });
   }
 
   addSentinel(host, ports) {
-    debug("addSentinel");
+    debug(`addSentinel`);
     if (!(this.host === host && this.ports.pipe === ports.pipe)) {
-      this.sentinels.push({ host: host, port: ports.pipe });
+      this.sentinels.push({ host, port: ports.pipe });
     }
   }
 
   addArchivist(host, ports) {
-    debug("addArchivist");
+    debug(`addArchivist`);
     if (!(this.host === host && this.ports.pipe === ports.pipe)) {
-      this.archivists.push({ host: host, port: ports.pipe });
+      this.archivists.push({ host, port: ports.pipe });
     }
   }
 
   initiateArchivistSend(maxEntries) {
-    debug("initiateArchivistSend");
-    let archivist = Math.floor(Math.random() * 10);
+    debug(`initiateArchivistSend`);
+    const archivist = Math.floor(Math.random() * 10);
 
     if (archivist < this.archivists.length) {
-      let buffer, entry = new XYO.DATA.Entry();
+      const entry = new XYO.SERVER.DATA.Entry();
 
       for (let i = 0; i < maxEntries && i < this.entries.length; i++) {
-        let buf = this.entries[i].toBuffer();
+        const buf = this.entries[i].toBuffer();
 
         if (!buf) {
-          throw new Error("Null Buffer");
+          throw new Error(`Null Buffer`);
         }
         entry.payload = buf;
       }
       for (let i = 0; i < this.keys.length; i++) {
-        entry.p2keys.push(this.keys[i].exportKey('components-public').n);
+        entry.p2keys.push(this.keys[i].exportKey(`components-public`).n);
       }
-      buffer = entry.toBuffer();
+      const buffer = entry.toBuffer();
       this.out(this.archivists[archivist], buffer);
     }
   }
 
   initiateSentinelPull() {
-    debug("initiateSentinelPull");
-    let sentinel = Math.floor(Math.random() * 10);
+    debug(`initiateSentinelPull`);
+    const sentinel = Math.floor(Math.random() * 10);
 
     if (sentinel < this.sentinels.length) {
-      let buffer, entry = new XYO.DATA.Entry();
+      const entry = new XYO.SERVER.DATA.Entry();
 
       for (let i = 0; i < this.keys.length; i++) {
-        entry.p2keys.push(this.keys[i].exportKey('components-public').n);
+        entry.p2keys.push(this.keys[i].exportKey(`components-public`).n);
       }
 
-      buffer = entry.toBuffer();
+      const buffer = entry.toBuffer();
       this.out(this.sentinels[sentinel], buffer);
 
       debug(`initiateSentinelPull-Done:${JSON.stringify(entry)}`);
@@ -132,22 +127,22 @@ class Bridge extends Node {
   }
 
   onEntry(socket, entry) {
-    debug('onEntry');
+    debug(`onEntry`);
     super.onEntry(socket, entry);
   }
 
   in(socket) {
-    debug('in');
+    debug(`in`);
     super.in(socket);
   }
 
   out(target, buffer) {
-    debug('out');
+    debug(`out`);
     super.out(target, buffer);
   }
 
   update(config) {
-    debug("update");
+    debug(`update`);
     super.update(config);
     if (this.sentinels.length === 0) {
       this.findSentinels(config.sentinels);
@@ -159,9 +154,9 @@ class Bridge extends Node {
   }
 
   status() {
-    let status = super.status();
+    const status = super.status();
 
-    status.type = "Bridge";
+    status.type = `Bridge`;
     status.sentinels = this.sentinels.length;
     status.archivists = this.archivists.length;
 

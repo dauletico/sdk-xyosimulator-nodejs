@@ -4,20 +4,19 @@
  * @Email:  developer@xyfindables.com
  * @Filename: Query.js
  * @Last modified by:   arietrouw
- * @Last modified time: Sunday, March 4, 2018 5:33 PM
+ * @Last modified time: Tuesday, March 6, 2018 4:52 PM
  * @License: All Rights Reserved
  * @Copyright: Copyright XY | The Findables Company
  */
 
-'use strict';
 
-const debug = require('debug')('Query'),
-  Simple = require('./Simple.js'),
-  CryptoByteBuffer = require("./CryptoByteBuffer.js");
+const debug = require(`debug`)(`Query`);
+const Simple = require(`./Simple.js`);
+const CryptoByteBuffer = require(`./CryptoByteBuffer.js`);
 
 class Query extends Simple {
   constructor(buffer) {
-    debug('constructor');
+    debug(`constructor`);
     super(buffer);
     this.type = 0x1006;
     this.target = new CryptoByteBuffer();
@@ -30,22 +29,21 @@ class Query extends Simple {
   }
 
   toBuffer() {
-    let buffer = super.toBuffer();
+    const buffer = super.toBuffer();
 
     return buffer;
   }
 
   fromBuffer(buffer) {
-    let byteBuffer = CryptoByteBuffer.wrap(buffer);
+    const byteBuffer = CryptoByteBuffer.wrap(buffer);
 
     super.fromBuffer(byteBuffer);
     return this;
   }
-
 }
 
 Query.fromArray = (array) => {
-  let query = new Query();
+  const query = new Query();
 
   query.bounty = array[0];
   query.address = array[1];
@@ -57,7 +55,7 @@ Query.fromArray = (array) => {
   return query;
 };
 
-debug("load");
+debug(`load`);
 
 Simple.classMap[0x1006] = Query;
 

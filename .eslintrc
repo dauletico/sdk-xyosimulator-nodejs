@@ -3,7 +3,7 @@
 # @Email:  developer@xyfindables.com
 # @Filename: .eslintrc
 # @Last modified by:   arietrouw
-# @Last modified time: Tuesday, March 6, 2018 3:59 PM
+# @Last modified time: Tuesday, March 6, 2018 4:14 PM
 # @License: All Rights Reserved
 # @Copyright: Copyright XY | The Findables Company
 
@@ -21,6 +21,7 @@
     "quotes": [2, "backtick"],
     "no-plusplus": 0,
     "class-methods-use-this": 0,
-    "prefer-destructuring": 0
+    "prefer-destructuring": 0,
+    "max-len": 0
   }
 }

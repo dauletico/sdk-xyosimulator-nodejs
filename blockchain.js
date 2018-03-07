@@ -4,15 +4,14 @@
  * @Email:  developer@xyfindables.com
  * @Filename: blockchain.js
  * @Last modified by:   arietrouw
- * @Last modified time: Wednesday, February 14, 2018 11:26 AM
+ * @Last modified time: Tuesday, March 6, 2018 7:10 PM
  * @License: All Rights Reserved
  * @Copyright: Copyright XY | The Findables Company
  */
 
-"use strict";
 
-const CryptoJS = require("crypto-js"),
-  BLOCKCHAIN = {};
+const CryptoJS = require(`crypto-js`);
+const BLOCKCHAIN = {};
 
 class Block {
   constructor(index, previousHash, timestamp, data, hash) {
@@ -24,26 +23,22 @@ class Block {
   }
 }
 
-BLOCKCHAIN.calculateHash = (index, previousHash, timestamp, data) => {
-  return CryptoJS.SHA256(index + previousHash + timestamp + data).toString();
-};
+BLOCKCHAIN.calculateHash = (index, previousHash, timestamp, data) => CryptoJS.SHA256(index + previousHash + timestamp + data).toString();
 
 BLOCKCHAIN.getLatestBlock = () => {
 
 };
 
 BLOCKCHAIN.generateNextBlock = (blockData) => {
-  let previousBlock = BLOCKCHAIN.getLatestBlock(),
-    nextIndex = previousBlock.index + 1,
-    nextTimestamp = new Date().getTime() / 1000,
-    nextHash = BLOCKCHAIN.calculateHash(nextIndex, previousBlock.hash, nextTimestamp, blockData);
+  const previousBlock = BLOCKCHAIN.getLatestBlock();
+  const nextIndex = previousBlock.index + 1;
+  const nextTimestamp = new Date().getTime() / 1000;
+  const nextHash = BLOCKCHAIN.calculateHash(nextIndex, previousBlock.hash, nextTimestamp, blockData);
 
   return new Block(nextIndex, previousBlock.hash, nextTimestamp, blockData, nextHash);
 };
 
-BLOCKCHAIN.getGenesisBlock = () => {
-  return new Block(0, "0", 1465154705, "XYO Block", "816534932c2b7154836da6afc367695e6337db8a921823784c14378abed4f7d7");
-};
+BLOCKCHAIN.getGenesisBlock = () => new Block(0, `0`, 1465154705, `XYO Block`, `816534932c2b7154836da6afc367695e6337db8a921823784c14378abed4f7d7`);
 
 BLOCKCHAIN.blockchain = [BLOCKCHAIN.getGenesisBlock()];
 

@@ -4,19 +4,19 @@
  * @Email:  developer@xyfindables.com
  * @Filename: Node.js
  * @Last modified by:   arietrouw
- * @Last modified time: Tuesday, March 6, 2018 3:58 PM
+ * @Last modified time: Tuesday, March 6, 2018 4:15 PM
  * @License: All Rights Reserved
  * @Copyright: Copyright XY | The Findables Company
  */
 
 
-const debug = require(`debug`)(`Node`),
-  Base = require(`../Base`),
-  Express = require(`express`),
-  bodyParser = require(`body-parser`),
-  NodeRSA = require(`node-rsa`),
-  NET = require(`net`),
-  XYO = require(`../../xyo.js`);
+const debug = require(`debug`)(`Node`);
+const Base = require(`../Base`);
+const Express = require(`express`);
+const bodyParser = require(`body-parser`);
+const NodeRSA = require(`node-rsa`);
+const NET = require(`net`);
+const XYO = require(`../../xyo.server.js`);
 
 class Node extends Base {
   constructor(moniker, host, ports, config) {
@@ -116,7 +116,7 @@ class Node extends Base {
       if (inData.length >= 4) {
         debug(`in:data: checking: `, buffer);
 
-        result = XYO.Simple.fromBuffer(inData);
+        result = XYO.SERVER.Simple.fromBuffer(inData);
         if (result.obj) {
           switch (result.obj.map) {
             case `entry`:
@@ -183,7 +183,7 @@ class Node extends Base {
         inData = data;
       }
 
-      const result = XYO.Simple.fromBuffer(inData);
+      const result = XYO.SERVER.Simple.fromBuffer(inData);
 
       if (result.obj) {
         switch (result.obj.map) {
@@ -361,7 +361,7 @@ class Node extends Base {
           entries: this.entriesByKey[id],
         });
       }
-      return res.status(404).send(format(`({}) Not Found`, id));
+      return res.status(404).send(`(${id}) Not Found`);
     }
     const results = [];
 

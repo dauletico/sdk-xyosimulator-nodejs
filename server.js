@@ -4,101 +4,98 @@
  * @Email:  developer@xyfindables.com
  * @Filename: index.js
  * @Last modified by:   arietrouw
- * @Last modified time: Sunday, March 4, 2018 6:26 PM
+ * @Last modified time: Tuesday, March 6, 2018 4:59 PM
  * @License: All Rights Reserved
  * @Copyright: Copyright XY | The Findables Company
  */
 
-'use strict';
-let debug = require('debug')('xyo-node'),
-  CONFIG = require('config'),
-  TESTDATACLASSES = require('./testdataclasses.js'),
-  XYO = require('./xyo.js');
+
+const debug = require(`debug`)(`xyo-node`);
+const CONFIG = require(`config`);
+const TESTDATACLASSES = require(`./testdataclasses.js`);
+const XYO = require(`./xyo.server.js`);
 
 /* ================= */
 /*  Local Functions  */
 /* ================= */
 
 const initialize = (complete) => {
-    debug('Initializing...');
-    let key;
+  debug(`Initializing...`);
 
-    if (CONFIG.sentinels) {
-      for (key in CONFIG.sentinels) {
-        let sentinel = CONFIG.sentinels[key];
+  if (CONFIG.sentinels) {
+    Object.keys(CONFIG.sentinels).forEach((key) => {
+      const sentinel = CONFIG.sentinels[key];
 
-        debug(`Sentinel Action: ${sentinel.action}`);
-        if (sentinel.action === 'launch') {
-          XYO.fromPort[sentinel.ports.pipe] = XYO.fromPort[sentinel.ports.pipe] || new XYO.Sentinel(`sentinel-${key}`, sentinel.host, sentinel.ports, sentinel.config || {});
-        }
+      debug(`Sentinel Action: ${sentinel.action}`);
+      if (sentinel.action === `launch`) {
+        XYO.SERVER.fromPort[sentinel.ports.pipe] = XYO.SERVER.fromPort[sentinel.ports.pipe] || new XYO.SERVER.Sentinel(`sentinel-${key}`, sentinel.host, sentinel.ports, sentinel.config || {});
       }
-    }
+    });
+  }
 
-    if (CONFIG.bridges) {
-      for (key in CONFIG.bridges) {
-        let bridge = CONFIG.bridges[key];
+  if (CONFIG.bridges) {
+    Object.keys(CONFIG.bridges).forEach((key) => {
+      const bridge = CONFIG.bridges[key];
 
-        debug(`Bridge Action: ${bridge.action}`);
-        if (bridge.action === 'launch') {
-          XYO.fromPort[bridge.ports.pipe] = XYO.fromPort[bridge.ports.pipe] || new XYO.Bridge(`bridge-${key}`, bridge.host, bridge.ports, bridge.config || {});
-        }
+      debug(`Bridge Action: ${bridge.action}`);
+      if (bridge.action === `launch`) {
+        XYO.SERVER.fromPort[bridge.ports.pipe] = XYO.SERVER.fromPort[bridge.ports.pipe] || new XYO.SERVER.Bridge(`bridge-${key}`, bridge.host, bridge.ports, bridge.config || {});
       }
-    }
+    });
+  }
 
-    if (CONFIG.archivists) {
-      for (key in CONFIG.archivists) {
-        let archivist = CONFIG.archivists[key];
+  if (CONFIG.archivists) {
+    Object.keys(CONFIG.archivists).forEach((key) => {
+      const archivist = CONFIG.archivists[key];
 
-        debug(`Archivist Action: ${archivist.action}`);
+      debug(`Archivist Action: ${archivist.action}`);
 
-        if (archivist.action === 'launch') {
-          XYO.fromPort[archivist.ports.pipe] = XYO.fromPort[archivist.ports.pipe] || new XYO.Archivist(`acrhivist-${key}`, archivist.host, archivist.ports, archivist.config || {});
-          XYO.fromPort[archivist.ports.pipe].findPeers(CONFIG.archivists);
-        }
+      if (archivist.action === `launch`) {
+        XYO.SERVER.fromPort[archivist.ports.pipe] = XYO.SERVER.fromPort[archivist.ports.pipe] || new XYO.SERVER.Archivist(`acrhivist-${key}`, archivist.host, archivist.ports, archivist.config || {});
+        XYO.SERVER.fromPort[archivist.ports.pipe].findPeers(CONFIG.archivists);
       }
-    }
+    });
+  }
 
-    if (CONFIG.diviners) {
-      for (key in CONFIG.diviners) {
-        let diviner = CONFIG.diviners[key];
+  if (CONFIG.diviners) {
+    Object.keys(CONFIG.diviners).forEach((key) => {
+      const diviner = CONFIG.diviners[key];
 
-        debug(`Diviner Action: ${diviner.action}`);
+      debug(`Diviner Action: ${diviner.action}`);
 
-        if (diviner.action === 'launch') {
-          XYO.fromPort[diviner.ports.pipe] = XYO.fromPort[diviner.ports.pipe] || new XYO.Diviner(`diviner-${key}`, diviner.host, diviner.ports, diviner.config || {});
-          XYO.fromPort[diviner.ports.pipe].findPeers(CONFIG.diviners);
-          XYO.fromPort[diviner.ports.pipe].findArchivists(CONFIG.archivists);
-        }
+      if (diviner.action === `launch`) {
+        XYO.SERVER.fromPort[diviner.ports.pipe] = XYO.SERVER.fromPort[diviner.ports.pipe] || new XYO.SERVER.Diviner(`diviner-${key}`, diviner.host, diviner.ports, diviner.config || {});
+        XYO.SERVER.fromPort[diviner.ports.pipe].findPeers(CONFIG.diviners);
+        XYO.SERVER.fromPort[diviner.ports.pipe].findArchivists(CONFIG.archivists);
       }
-    }
+    });
+  }
 
-    if (complete) {
-      complete();
-    }
+  if (complete) {
+    complete();
+  }
+};
 
-  },
-  updateObjects = () => {
-    debug(`>>>>>>>>TIMER<<<<<<<<< [${Object.keys(XYO.COMPONENTS.Node.fromMoniker).length}]`);
-    let key;
+const updateObjects = () => {
+  debug(`>>>>>>>>TIMER<<<<<<<<< [${Object.keys(XYO.SERVER.COMPONENTS.Node.fromMoniker).length}]`);
 
-    XYO.Base.updateCount++;
+  XYO.SERVER.Base.updateCount++;
 
-    for (key in XYO.COMPONENTS.Node.fromMoniker) {
-      if (XYO.COMPONENTS.Node.fromMoniker.hasOwnProperty(key)) {
-        XYO.COMPONENTS.Node.fromMoniker[key].update(CONFIG);
-      }
-    }
-  },
-  startTimers = () => {
-    setInterval(() => {
-      updateObjects();
+  Object.keys(XYO.SERVER.COMPONENTS.Node.fromMoniker).forEach((key) => {
+    XYO.SERVER.COMPONENTS.Node.fromMoniker[key].update(CONFIG);
+  });
+};
 
-    }, CONFIG.clock);
-  },
-  run = () => {
+const startTimers = () => {
+  setInterval(() => {
     updateObjects();
-    startTimers();
-  };
+  }, CONFIG.clock);
+};
+
+const run = () => {
+  updateObjects();
+  startTimers();
+};
 
 
 initialize(() => {

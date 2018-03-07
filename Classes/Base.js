@@ -4,17 +4,14 @@
  * @Email:  developer@xyfindables.com
  * @Filename: Base.js
  * @Last modified by:   arietrouw
- * @Last modified time: Wednesday, February 14, 2018 11:26 AM
+ * @Last modified time: Tuesday, March 6, 2018 4:53 PM
  * @License: All Rights Reserved
  * @Copyright: Copyright XY | The Findables Company
  */
 
-"use strict";
 
 class Base {
 
-  constructor() {
-  }
 }
 
 module.exports = Base;

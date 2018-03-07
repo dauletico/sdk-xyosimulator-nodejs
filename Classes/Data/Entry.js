@@ -4,26 +4,24 @@
  * @Email:  developer@xyfindables.com
  * @Filename: Entry.js
  * @Last modified by:   arietrouw
- * @Last modified time: Sunday, March 4, 2018 9:38 PM
+ * @Last modified time: Tuesday, March 6, 2018 4:51 PM
  * @License: All Rights Reserved
  * @Copyright: Copyright XY | The Findables Company
  */
 
-"use strict";
 
-const debug = require("debug")("Entry"),
-  Simple = require("./Simple.js"),
-  CryptoByteBuffer = require("./CryptoByteBuffer.js"),
-  bigInt = require("big-integer");
+const debug = require(`debug`)(`Entry`);
+const Simple = require(`./Simple.js`);
+const CryptoByteBuffer = require(`./CryptoByteBuffer.js`);
+const bigInt = require(`big-integer`);
 
 class Entry extends Simple {
-
   constructor(buffer) {
     // debug("constructor");
     super(buffer);
     this.type = 0x1005;
     this.payloads = [];
-    this.nonce = bigInt.randBetween(bigInt("0x0"), bigInt("0x1").shiftLeft(255));
+    this.nonce = bigInt.randBetween(bigInt(`0x0`), bigInt(`0x1`).shiftLeft(255));
     this.difficulty = 0;
     this.epoch = 0;
     this.p1keys = [];
@@ -41,14 +39,14 @@ class Entry extends Simple {
   }
 
   p1Sign(signer, callback) {
-    debug("p1Sign");
-    let result, buffer = this.toBuffer();
+    debug(`p1Sign`);
+    const buffer = this.toBuffer();
 
     if (this.p2keys.length === 0) {
-      throw new Error("Missing p2 Keys");
+      throw new Error(`Missing p2 Keys`);
     }
 
-    result = signer(buffer);
+    const result = signer(buffer);
     this.p1keys = result.keys;
     this.p1signatures = result.signatures;
     if (callback) {
@@ -57,22 +55,22 @@ class Entry extends Simple {
   }
 
   p2Sign(signer, callback) {
-    debug("p2Sign");
-    let result, buffer = this.toBuffer();
+    debug(`p2Sign`);
+    const buffer = this.toBuffer();
 
     if (this.p1keys.length === 0) {
-      throw new Error("Missing p1 Keys - They are required for a p2Sign");
+      throw new Error(`Missing p1 Keys - They are required for a p2Sign`);
     }
 
     if (this.p1signatures.length === 0) {
-      throw new Error("Missing p1 Signatures - They are required for a p2Sign");
+      throw new Error(`Missing p1 Signatures - They are required for a p2Sign`);
     }
 
     if (this.p2keys.length === 0) {
-      throw new Error("Missing p2 Keys - They are required for a p2Sign");
+      throw new Error(`Missing p2 Keys - They are required for a p2Sign`);
     }
 
-    result = signer(buffer);
+    const result = signer(buffer);
 
     this.p2signatures = result.signatures;
     if (callback) {
@@ -81,7 +79,7 @@ class Entry extends Simple {
   }
 
   toBuffer() {
-    let buffer = super.toBuffer();
+    const buffer = super.toBuffer();
 
     buffer.writeBufferArray(this.payloads);
     buffer.writeUInt32(this.epoch);
@@ -98,7 +96,7 @@ class Entry extends Simple {
   }
 
   fromBuffer(buffer) {
-    let byteBuffer = CryptoByteBuffer.wrap(buffer);
+    const byteBuffer = CryptoByteBuffer.wrap(buffer);
 
     super.fromBuffer(byteBuffer);
 
@@ -118,7 +116,7 @@ class Entry extends Simple {
   }
 }
 
-debug("load");
+debug(`load`);
 
 Simple.classMap[0x1005] = Entry;
 

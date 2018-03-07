@@ -4,7 +4,7 @@
  * @Email:  developer@xyfindables.com
  * @Filename: Diviner.js
  * @Last modified by:   arietrouw
- * @Last modified time: Tuesday, March 6, 2018 4:02 PM
+ * @Last modified time: Tuesday, March 6, 2018 4:17 PM
  * @License: All Rights Reserved
  * @Copyright: Copyright XY | The Findables Company
  */
@@ -236,9 +236,8 @@ class Diviner extends Node {
 
   findPeers(diviners) {
     debug(`findPeers`);
-    let key;
 
-    Object.keys(diviners).forEach(key, function () {
+    Object.keys(diviners).forEach((key) => {
       const diviner = diviners[key];
 
       if (!(diviner.ports.pipe === this.ports.pipe && diviner.host === this.host)) {
