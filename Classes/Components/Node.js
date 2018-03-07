@@ -4,7 +4,7 @@
  * @Email:  developer@xyfindables.com
  * @Filename: Node.js
  * @Last modified by:   arietrouw
- * @Last modified time: Tuesday, March 6, 2018 3:35 PM
+ * @Last modified time: Tuesday, March 6, 2018 3:58 PM
  * @License: All Rights Reserved
  * @Copyright: Copyright XY | The Findables Company
  */
@@ -53,7 +53,7 @@ class Node extends Base {
     });
     this.app.post(`*`, (req, res) => {
       if (!(req.body)) {
-        return res.status(400).send(`Empty body not allowed`);
+        res.status(400).send(`Empty body not allowed`);
       }
       this.post(req, res);
     });
@@ -61,8 +61,8 @@ class Node extends Base {
 
   get(req, res) {
     debug(`get`);
-    let contentType = req.headers[`content-type`],
-      pathParts = req.path.split(`/`);
+    const contentType = req.headers[`content-type`];
+    const pathParts = req.path.split(`/`);
 
     if (contentType && pathParts.length > 1) {
       const action = pathParts[1];
@@ -118,11 +118,9 @@ class Node extends Base {
 
         result = XYO.Simple.fromBuffer(inData);
         if (result.obj) {
-          const obj = result.obj;
-
-          switch (obj.map) {
+          switch (result.obj.map) {
             case `entry`:
-              this.onEntry(socket, obj);
+              this.onEntry(socket, result.obj);
               break;
             default:
               break;
@@ -175,26 +173,22 @@ class Node extends Base {
 
   out(target, buffer) {
     debug(`out: ${target.host},${target.port},${buffer.length}`);
-    let inData = null,
-      socket = NET.createConnection(target.port, target.host);
+    let inData = null;
+    const socket = NET.createConnection(target.port, target.host);
 
     socket.on(`data`, (data) => {
-      let result;
-
       if (inData) {
         inData = Buffer.concat([inData, data]);
       } else {
         inData = data;
       }
 
-      result = XYO.Simple.fromBuffer(inData);
+      const result = XYO.Simple.fromBuffer(inData);
 
       if (result.obj) {
-        const obj = result.obj;
-
-        switch (obj.map) {
+        switch (result.obj.map) {
           case `entry`:
-            this.onEntry(socket, obj);
+            this.onEntry(socket, result.obj);
             break;
           default:
             break;
@@ -207,12 +201,12 @@ class Node extends Base {
     }).on(`end`, () => {
       debug(`out:done`);
     }).on(`error`, (ex) => {
-      debug(format(`error:{}`, ex));
+      debug(`error:${ex}`);
     });
   }
 
   addPeer(host, ports) {
-    debug(format(`addPeer[{}, {}]`, host, ports.pipe));
+    debug(`addPeer[${host}, ${ports.pipe}]`);
     if (!(this.host === host && this.ports.pipe === ports.pipe)) {
       this.peers.push({
         host,
@@ -240,35 +234,35 @@ class Node extends Base {
     this.entries.push(entry);
   }
 
-  signHeadAndTail(entry) {
+  signHeadAndTail(_entry) {
     debug(`signHeadAndTail`);
-    let payload,
-      headKeys = this.keys.slice(0);
+    const entry = _entry;
+    const headKeys = this.keys.slice(0);
 
     this.spinKeys();
 
     entry.headKeys = this.publicKeysFromKeys(headKeys);
     entry.tailKeys = this.publicKeysFromKeys(this.keys);
 
-    payload = entry.toBuffer();
+    const payload = entry.toBuffer();
 
     this.signHead(entry, payload, headKeys);
     this.signTail(entry, payload, this.keys);
   }
 
-  signHead(entry, payload, keys) {
+  signHead(_entry, payload, keys) {
     debug(`signHead`);
-    let result;
+    const entry = _entry;
 
-    result = this.sign(payload, keys);
+    const result = this.sign(payload, keys);
     entry.headSignatures = result.signatures;
   }
 
-  signTail(entry, payload, keys) {
+  signTail(_entry, _payload, _keys) {
     debug(`signTail`);
-    let result;
+    const entry = _entry;
 
-    result = this.sign(payload, keys);
+    const result = this.sign(_payload, _keys);
     entry.tailSignatures = result.signatures;
   }
 
@@ -292,17 +286,17 @@ class Node extends Base {
 
   sign(payload, signingKeys) {
     debug(`sign`);
-    let keys = [],
-      signature,
-      signatures = [],
-      signKeys = signingKeys || this.keys;
+    const keys = [];
+    let signature;
+    const signatures = [];
+    const signKeys = signingKeys || this.keys;
 
     for (let i = 0; i < signKeys.length; i++) {
       signature = signKeys[i].sign(payload);
-      debug(format(`SIGLEN: {}`, signature.length));
+      debug(`SIGLEN: ${signature.length}`);
       signatures.push(signature);
       keys.push(signKeys[i].exportKey(`components-public`).n);
-      debug(format(`sign: {},{}`, i, signatures[i].length));
+      debug(`sign: ${i},${signatures[i].length}`);
     }
     return {
       signatures,
@@ -351,8 +345,8 @@ class Node extends Base {
 
   returnJSONEntries(req, res) {
     debug(`returnJSONItems`);
-    let pathParts = req.path.split(`/`),
-      id = null;
+    const pathParts = req.path.split(`/`);
+    let id = null;
 
     if (pathParts.length > 2) {
       id = pathParts[2];
