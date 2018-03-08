@@ -4,94 +4,87 @@
  * @Email:  developer@xyfindables.com
  * @Filename: gulpfile.js
  * @Last modified by:   arietrouw
- * @Last modified time: Sunday, March 4, 2018 6:29 PM
+ * @Last modified time: Thursday, March 8, 2018 1:09 PM
  * @License: All Rights Reserved
  * @Copyright: Copyright XY | The Findables Company
  */
 
-'use strict';
 
-const gulp = require('gulp'),
-  nodemon = require('gulp-nodemon'),
-  env = require('gulp-env');
+const gulp = require(`gulp`),
+  nodemon = require(`gulp-nodemon`),
+  env = require(`gulp-env`);
 
 gulp.clear = () => {
-  process.stdout.write('\x1b[2J');
+  process.stdout.write(`\x1b[2J`);
 };
 
 gulp.args = () => {
-
   let argList = process.argv,
     arg = {},
-    a, opt, thisOpt, curOpt;
+    a,
+    opt,
+    thisOpt,
+    curOpt;
 
   for (a = 0; a < argList.length; a++) {
-
     thisOpt = argList[a].trim();
-    opt = thisOpt.replace(/^\-+/, '');
+    opt = thisOpt.replace(/^\-+/, ``);
 
     if (opt === thisOpt) {
-
       // argument value
       if (curOpt) {
         arg[curOpt] = opt;
       }
       curOpt = null;
-
     } else {
-
       // argument name
       curOpt = opt;
       arg[curOpt] = true;
-
     }
-
   }
 
   return arg;
-
 };
 
-gulp.task('default', () => {
-  let args = gulp.args();
+gulp.task(`default`, () => {
+  const args = gulp.args();
 
   if (args.run) {
     process.env.NODE_ENV = args.run;
   }
-  gulp.start('run');
+  gulp.start(`run`);
 });
 
-gulp.task('run', ['nodemon'], () => {
+gulp.task(`run`, [`nodemon`], () => {
   gulp.clear();
 });
 
-gulp.task('inspect', () => {
-  let args = gulp.args();
+gulp.task(`inspect`, () => {
+  const args = gulp.args();
 
   if (args.run) {
     process.env.NODE_ENV = args.run;
   }
-  gulp.start('runInspect');
+  gulp.start(`runInspect`);
 });
 
-gulp.task('runInspect', ['nodemon-inspect'], () => {
+gulp.task(`runInspect`, [`nodemon-inspect`], () => {
 
 });
 
-gulp.task('nodemon-inspect', (cb) => {
-
+gulp.task(`nodemon-inspect`, (cb) => {
   let started = false;
 
   env({
     vars: {
-      DEBUG: '*,-socket.io*,-engine*,-express*,-snapdragon*,-xyo-solidity*'
-    }
+      DEBUG: `*,-socket.io*,-engine*,-express*,-snapdragon*,-xyo-solidity*`,
+    },
   });
 
   return nodemon({
-    'script': 'server.js',
-    'nodeArgs': '--inspect-brk'
-  }).on('start', () => {
+    script: `server.js`,
+    nodeArgs: `--inspect-brk`,
+  }).on(`start`, () => {
     // to avoid nodemon being started multiple times
     // thanks @matthisk
     gulp.clear();
@@ -102,20 +95,19 @@ gulp.task('nodemon-inspect', (cb) => {
   });
 });
 
-gulp.task('nodemon', (cb) => {
-
+gulp.task(`nodemon`, (cb) => {
   let started = false;
 
   env({
     vars: {
-      DEBUG: '*,-socket.io*,-engine*,-express*,-snapdragon*,-xyo-solidity*'
-    }
+      DEBUG: `*,-socket.io*,-engine*,-express*,-snapdragon*,-xyo-solidity*`,
+    },
   });
 
   return nodemon({
-    'script': 'server.js',
-    'nodeArgs': ''
-  }).on('start', () => {
+    script: `server.js`,
+    nodeArgs: ``,
+  }).on(`start`, () => {
     // to avoid nodemon being started multiple times
     // thanks @matthisk
     gulp.clear();

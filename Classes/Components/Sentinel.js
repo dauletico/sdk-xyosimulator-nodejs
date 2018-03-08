@@ -4,7 +4,7 @@
  * @Email:  developer@xyfindables.com
  * @Filename: Sentinel.js
  * @Last modified by:   arietrouw
- * @Last modified time: Tuesday, March 6, 2018 4:48 PM
+ * @Last modified time: Wednesday, March 7, 2018 7:57 PM
  * @License: All Rights Reserved
  * @Copyright: Copyright XY | The Findables Company
  */
@@ -61,7 +61,7 @@ class Sentinel extends Node {
     }
   }
 
-  initiateBoundWitness() {
+  initiateBoundWitness(_payload) {
     debug(`initiateBoundWitness`);
     const peer = Math.floor(Math.random() * 10);
 
@@ -79,7 +79,7 @@ class Sentinel extends Node {
         throw new Error(`Missing Id`);
       }
 
-      entry.payload = Buffer.alloc(1);
+      entry.payload = _payload || Buffer.alloc(1);
 
       const buffer = entry.toBuffer();
       this.out(this.peers[peer], buffer);
