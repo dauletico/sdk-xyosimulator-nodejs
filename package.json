@@ -1,6 +1,6 @@
 {
   "name": "xyo-node",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "XY Oracle Platform implemented in Node.js",
   "main": "xyo.server.js",
   "directories": {
