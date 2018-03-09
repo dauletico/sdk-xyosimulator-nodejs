@@ -4,7 +4,7 @@
  * @Email:  developer@xyfindables.com
  * @Filename: Entry.js
  * @Last modified by:   arietrouw
- * @Last modified time: Tuesday, March 6, 2018 4:51 PM
+ * @Last modified time: Thursday, March 8, 2018 4:46 PM
  * @License: All Rights Reserved
  * @Copyright: Copyright XY | The Findables Company
  */
@@ -80,7 +80,6 @@ class Entry extends Simple {
 
   toBuffer() {
     const buffer = super.toBuffer();
-
     buffer.writeBufferArray(this.payloads);
     buffer.writeUInt32(this.epoch);
     buffer.writeUInt256(this.nonce);

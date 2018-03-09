@@ -4,7 +4,7 @@
  * @Email:  developer@xyfindables.com
  * @Filename: Sentinel.js
  * @Last modified by:   arietrouw
- * @Last modified time: Wednesday, March 7, 2018 7:57 PM
+ * @Last modified time: Thursday, March 8, 2018 2:20 PM
  * @License: All Rights Reserved
  * @Copyright: Copyright XY | The Findables Company
  */
@@ -12,7 +12,8 @@
 
 const debug = require(`debug`)(`Sentinel`);
 const Node = require(`./Node.js`);
-const XYO = require(`../../xyo.server.js`);
+const Entry = require(`../../Classes/Data/Entry.js`);
+const Id = require(`../../Classes/Data/Id.js`);
 
 class Sentinel extends Node {
   constructor(moniker, host, ports, config) {
@@ -66,24 +67,48 @@ class Sentinel extends Node {
     const peer = Math.floor(Math.random() * 10);
 
     if (peer < this.peers.length) {
-      const entry = new XYO.SERVER.DATA.Entry();
+      const entry = new Entry();
 
       entry.p2keys = [];
       for (let i = 0; i < this.keys.length; i++) {
         entry.p2keys.push(this.keys[i].exportKey(`components-public`).n);
       }
 
-      const id = new XYO.SERVER.DATA.Id();
+      const id = new Id();
 
       if (!id) {
         throw new Error(`Missing Id`);
       }
 
-      entry.payload = _payload || Buffer.alloc(1);
+      if (_payload) {
+        entry.payloads.push(_payload);
+      }
 
       const buffer = entry.toBuffer();
       this.out(this.peers[peer], buffer);
     }
+  }
+
+  selfSignBoundWitness(_payload) {
+    debug(`selfSignBoundWitness`);
+    const entry = new Entry();
+
+    entry.p2keys = [];
+    for (let i = 0; i < this.keys.length; i++) {
+      entry.p2keys.push(this.keys[i].exportKey(`components-public`).n);
+    }
+
+    const id = new Id();
+
+    if (!id) {
+      throw new Error(`Missing Id`);
+    }
+    if (_payload) {
+      entry.payloads.push(_payload);
+    }
+
+    const buffer = entry.toBuffer();
+    this.loopback(buffer);
   }
 
   initiateBridgeSend(maxEntries) {
@@ -91,7 +116,7 @@ class Sentinel extends Node {
     const bridge = Math.floor(Math.random() * 10);
 
     if (bridge < this.bridges.length) {
-      const entry = new XYO.SERVER.DATA.Entry();
+      const entry = new Entry();
 
       entry.p2keys = [];
 
@@ -102,7 +127,7 @@ class Sentinel extends Node {
           throw new Error(`Missing Payload`);
         }
 
-        entry.payload = buf;
+        entry.payloads.push(buf);
       }
       for (let i = 0; i < this.keys.length; i++) {
         entry.p2keys.push(this.keys[i].exportKey(`components-public`).n);

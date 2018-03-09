@@ -4,7 +4,7 @@
  * @Email:  developer@xyfindables.com
  * @Filename: Bridge.js
  * @Last modified by:   arietrouw
- * @Last modified time: Tuesday, March 6, 2018 4:19 PM
+ * @Last modified time: Thursday, March 8, 2018 2:13 PM
  * @License: All Rights Reserved
  * @Copyright: Copyright XY | The Findables Company
  */
@@ -12,7 +12,7 @@
 
 const debug = require(`debug`)(`Bridge`);
 const Node = require(`./Node.js`);
-const XYO = require(`../../xyo.server.js`);
+const Entry = require(`../../Classes/Data/Entry.js`);
 
 class Bridge extends Node {
   constructor(moniker, host, ports, config) {
@@ -90,7 +90,7 @@ class Bridge extends Node {
     const archivist = Math.floor(Math.random() * 10);
 
     if (archivist < this.archivists.length) {
-      const entry = new XYO.SERVER.DATA.Entry();
+      const entry = new Entry();
 
       for (let i = 0; i < maxEntries && i < this.entries.length; i++) {
         const buf = this.entries[i].toBuffer();
@@ -98,7 +98,7 @@ class Bridge extends Node {
         if (!buf) {
           throw new Error(`Null Buffer`);
         }
-        entry.payload = buf;
+        entry.payloads.push(buf);
       }
       for (let i = 0; i < this.keys.length; i++) {
         entry.p2keys.push(this.keys[i].exportKey(`components-public`).n);
@@ -113,7 +113,7 @@ class Bridge extends Node {
     const sentinel = Math.floor(Math.random() * 10);
 
     if (sentinel < this.sentinels.length) {
-      const entry = new XYO.SERVER.DATA.Entry();
+      const entry = new Entry();
 
       for (let i = 0; i < this.keys.length; i++) {
         entry.p2keys.push(this.keys[i].exportKey(`components-public`).n);

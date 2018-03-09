@@ -4,7 +4,7 @@
  * @Email:  developer@xyfindables.com
  * @Filename: CryptoByteBuffer.js
  * @Last modified by:   arietrouw
- * @Last modified time: Tuesday, March 6, 2018 4:50 PM
+ * @Last modified time: Thursday, March 8, 2018 6:48 PM
  * @License: All Rights Reserved
  * @Copyright: Copyright XY | The Findables Company
  */
@@ -30,7 +30,7 @@ class CryptoByteBuffer extends ByteBuffer {
       strBuf = `0${strBuf}`;
     }
 
-    this.append(Buffer.from(strBuf, `hex`, 32));
+    this.append(ByteBuffer.fromHex(strBuf));
   }
 
   writeInt256(value) {
@@ -46,7 +46,7 @@ class CryptoByteBuffer extends ByteBuffer {
     while (strBuf.length < 64) {
       strBuf = `0${strBuf}`;
     }
-    this.append(Buffer.from(strBuf, `hex`, 32));
+    this.append(ByteBuffer.fromHex(strBuf));
   }
 
   readUInt256() {
@@ -67,6 +67,7 @@ class CryptoByteBuffer extends ByteBuffer {
     debug(`writeBufferArray: `, this.offset, `, `, array.length);
     this.writeUInt16(array.length);
     for (let i = 0; i < array.length; i++) {
+      debug(`writeBufferArray[${i}]`);
       this.writeBuffer(array[i]);
     }
   }
@@ -74,39 +75,43 @@ class CryptoByteBuffer extends ByteBuffer {
   readBufferArray() {
     debug(`readBufferArray: `, this.offset);
     const result = [];
+    debug(`readBufferArray: `, this.offset);
     const length = this.readUInt16();
+    debug(`readBufferArray: `, this.offset);
     for (let i = 0; i < length; i++) {
+      debug(`readBufferArray[${i}]: `, this.offset);
       result.push(this.readBuffer());
     }
     return result;
   }
 
-  writeBuffer(array) {
-    debug(`writeBuffer: `, this.offset, `, `, array.length);
-    this.writeUInt16(array.length);
-    this.append(array);
+  writeBuffer(_buffer) {
+    const buffer = CryptoByteBuffer.wrap(_buffer);
+    buffer.offset = 0;
+    debug(`writeBuffer: `, this.offset, `, `, buffer.getLength(), `, `, buffer.offset);
+    this.writeUInt16(buffer.getLength());
+
+    for (let i = 0; i < buffer.getLength(); i++) {
+      this.writeUInt8(buffer.readUInt8());
+    }
   }
 
   readBuffer() {
     debug(`readBuffer: `, this.offset);
     const length = this.readUInt16();
+    debug(`readBuffer: `, length);
     const buffer = this.slice(this.offset, this.offset + length);
     this.offset += length;
     return buffer;
   }
+
+  getLength() {
+    return this.buffer.length;
+  }
 }
-
-CryptoByteBuffer.wrap = (buffer, encoding, littleEndian, noAssert) => {
-  const bb = ByteBuffer.wrap(buffer, encoding, littleEndian, noAssert);
-  const cbb = new CryptoByteBuffer(0, littleEndian, noAssert);
-
-  cbb.buffer = bb.buffer;
-  cbb.offset = 0;
-  cbb.limit = bb.byteLength;
-
-  return cbb;
-};
 
 debug(`load`);
 
-module.exports = CryptoByteBuffer;
+ByteBuffer.prototype = CryptoByteBuffer.prototype;
+
+module.exports = ByteBuffer;
