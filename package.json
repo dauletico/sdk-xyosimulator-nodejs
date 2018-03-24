@@ -2,7 +2,7 @@
   "name": "xyo-node",
   "version": "0.1.5",
   "description": "XY Oracle Platform implemented in Node.js",
-  "main": "xyo.server.js",
+  "main": "./src/js/index.js",
   "directories": {
     "Classes": "Classes",
     "config": "config"
@@ -31,33 +31,29 @@
   "author": "Arie Trouw",
   "license": "UNLICENSED",
   "dependencies": {
-    "big-integer": "^1.6.26",
-    "buffer-crc32": "^0.2.13",
+    "biginteger.js": "^1.0.1",
     "bytebuffer": "^5.0.1",
     "config": "^1.30.0",
     "debug": "^3.1.0",
-    "express": "^4.16.2",
+    "express": "^4.16.3",
     "json5": "^0.5.1",
     "node-rsa": "^0.4.2",
-    "npm": "^5.7.1",
-    "solc": "^0.4.20",
-    "web3": "^0.14.1",
     "websocket": "^1.0.25",
-    "xyo-solidity": "^0.1.5"
+    "xyo-solidity": "^0.1.45"
   },
   "devDependencies": {
     "babel-eslint": "^8.2.2",
-    "browser-sync": "^2.23.6",
-    "eslint": "^4.18.2",
+    "browserify": "^16.1.1",
+    "eslint": "^4.19.1",
     "eslint-config-airbnb": "^16.1.0",
     "eslint-plugin-import": "^2.9.0",
     "eslint-plugin-jsx-a11y": "^6.0.3",
     "eslint-plugin-react": "^7.7.0",
     "gulp": "^3.9.1",
-    "gulp-debug": "^3.2.0",
-    "gulp-env": "^0.4.0",
-    "gulp-nodemon": "^2.2.1",
-    "mocha": "^5.0.2",
-    "node-debugger": "^1.0.0"
+    "gulp-connect": "^5.5.0",
+    "gulp-foreach": "^0.1.0",
+    "gulp-sourcemaps": "^2.6.4",
+    "vinyl-buffer": "^1.0.1",
+    "vinyl-source-stream": "^2.0.0"
   }
 }

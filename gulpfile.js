@@ -4,116 +4,18 @@
  * @Email:  developer@xyfindables.com
  * @Filename: gulpfile.js
  * @Last modified by:   arietrouw
- * @Last modified time: Thursday, March 8, 2018 1:09 PM
+ * @Last modified time: Friday, March 23, 2018 11:10 PM
  * @License: All Rights Reserved
  * @Copyright: Copyright XY | The Findables Company
  */
 
+/* eslint no-useless-escape:0 */
 
-const gulp = require(`gulp`),
-  nodemon = require(`gulp-nodemon`),
-  env = require(`gulp-env`);
+const gulp = require(`gulp`);
 
-gulp.clear = () => {
-  process.stdout.write(`\x1b[2J`);
-};
+require(`./gulp/clean`);
+require(`./gulp/javascript`);
+require(`./gulp/solidity`);
+require(`./gulp/test`);
 
-gulp.args = () => {
-  let argList = process.argv,
-    arg = {},
-    a,
-    opt,
-    thisOpt,
-    curOpt;
-
-  for (a = 0; a < argList.length; a++) {
-    thisOpt = argList[a].trim();
-    opt = thisOpt.replace(/^\-+/, ``);
-
-    if (opt === thisOpt) {
-      // argument value
-      if (curOpt) {
-        arg[curOpt] = opt;
-      }
-      curOpt = null;
-    } else {
-      // argument name
-      curOpt = opt;
-      arg[curOpt] = true;
-    }
-  }
-
-  return arg;
-};
-
-gulp.task(`default`, () => {
-  const args = gulp.args();
-
-  if (args.run) {
-    process.env.NODE_ENV = args.run;
-  }
-  gulp.start(`run`);
-});
-
-gulp.task(`run`, [`nodemon`], () => {
-  gulp.clear();
-});
-
-gulp.task(`inspect`, () => {
-  const args = gulp.args();
-
-  if (args.run) {
-    process.env.NODE_ENV = args.run;
-  }
-  gulp.start(`runInspect`);
-});
-
-gulp.task(`runInspect`, [`nodemon-inspect`], () => {
-
-});
-
-gulp.task(`nodemon-inspect`, (cb) => {
-  let started = false;
-
-  env({
-    vars: {
-      DEBUG: `*,-socket.io*,-engine*,-express*,-snapdragon*,-xyo-solidity*`,
-    },
-  });
-
-  return nodemon({
-    script: `server.js`,
-    nodeArgs: `--inspect-brk`,
-  }).on(`start`, () => {
-    // to avoid nodemon being started multiple times
-    // thanks @matthisk
-    gulp.clear();
-    if (!started) {
-      cb();
-      started = true;
-    }
-  });
-});
-
-gulp.task(`nodemon`, (cb) => {
-  let started = false;
-
-  env({
-    vars: {
-      DEBUG: `*,-socket.io*,-engine*,-express*,-snapdragon*,-xyo-solidity*`,
-    },
-  });
-
-  return nodemon({
-    script: `server.js`,
-    nodeArgs: ``,
-  }).on(`start`, () => {
-    // to avoid nodemon being started multiple times
-    // thanks @matthisk
-    gulp.clear();
-    if (!started) {
-      cb();
-      started = true;
-    }
-  });
-});
+gulp.task(`default`, [`js`, `solidity`]);
