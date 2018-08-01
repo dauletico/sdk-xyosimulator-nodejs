@@ -47,7 +47,7 @@ const javascript = () => {
 
 gulp.task(`js`, javascript);
 
-gulp.task(`watch-js`, [`js`], () => {
+gulp.task(`watch-js`, gulp.series(`js`), () => {
   watch = watch || gulp.watch(`./src/js/**/*.js`, [`js`], connect.reload());
 });
 

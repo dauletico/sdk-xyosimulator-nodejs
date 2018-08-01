@@ -27,7 +27,7 @@ const solidity = () =>
     .pipe(gulp.dest(`./dist/`));
 gulp.task(`solidity`, solidity);
 
-gulp.task(`watch-solidity`, [`solidity`], () => {
+gulp.task(`watch-solidity`, gulp.series(`solidity`), () => {
   watch = watch || gulp.watch(`./node_modules/xyo-solidity/dist/**/*.json`, [`solidity`], connect.reload());
 });
 

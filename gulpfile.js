@@ -18,4 +18,4 @@ require(`./gulp/javascript`);
 require(`./gulp/solidity`);
 require(`./gulp/test`);
 
-gulp.task(`default`, [`js`, `solidity`]);
+gulp.task(`default`, gulp.series(`js`, `solidity`));

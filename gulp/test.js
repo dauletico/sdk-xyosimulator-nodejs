@@ -17,7 +17,7 @@ const testDataClasses = require(`../test/dataclasses.js`);
 let watch = null;
 
 const test = () => {
-  testDataClasses((_testDataClassesError) => {
+  testDataClasses.All((_testDataClassesError) => {
     if (_testDataClassesError) {
       console.error(`testDataClasses FAILED`);
     } else {
@@ -29,7 +29,7 @@ const test = () => {
 
 gulp.task(`test`, test);
 
-gulp.task(`watch-test`, [`test`], () => {
+gulp.task(`watch-test`, gulp.series(`test`), () => {
   watch = watch || gulp.watch(`./src/test/**/*.*`, [`test`], connect.reload());
 });
 
