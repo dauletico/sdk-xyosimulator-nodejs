@@ -1,0 +1,17 @@
+xyo: # XYO Configurations
+
+  nodes: # Config for all nodes on the network
+
+    discovery: # Configuration for how nodes will find one another
+
+      subnet: # For Nodes on the same subnet
+
+        ports: # These ports should be considered default ports for nodes wishing to be found
+          - http: 15555
+            socket: 19555
+          - http: 15556
+            socket: 19556
+          - http: 15557
+            socket: 19557
+          - http: 15558
+            socket: 19558

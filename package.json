@@ -1,0 +1,52 @@
+{
+  "name": "xyo-node",
+  "version": "1.0.0",
+  "description": "A peer to peer client/server implementation for the XYO network",
+  "main": "index.js",
+  "author": "Ryan Pillsbury",
+  "license": "ISC",
+  "scripts": {
+    "start": "npm run serve",
+    "build": "npm run build-ts && npm run tslint",
+    "serve": "node dist/main.js",
+    "watch-node": "nodemon dist/main.js",
+    "test": "export NODE_ENV=test && jest --no-cache --forceExit --coverage --verbose --detectOpenHandles",
+    "watch": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"cyan.bold,green.bold\" \"npm run watch-ts\" \"npm run watch-node\"",
+    "build-ts": "tsc",
+    "watch-ts": "tsc -w",
+    "tslint": "tslint -c tslint.json -p tsconfig.json",
+    "tslint-fix": "tslint -c tslint.json -p tsconfig.json --fix",
+    "debug": "npm run build && npm run watch-debug",
+    "serve-debug": "nodemon --inspect-brk=8081 dist/main.js",
+    "watch-debug": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"cyan.bold,green.bold\" \"npm run watch-ts\" \"npm run serve-debug\"",
+    "precommit": "echo \"Build must pass before committing\" && npm run build"
+  },
+  "dependencies": {
+    "binary": "^0.3.0",
+    "bytebuffer": "^5.0.1",
+    "config": "^2.0.1",
+    "debug": "^3.1.0",
+    "express": "^4.16.3",
+    "lodash": "^4.17.10",
+    "winston": "^2.4.3"
+  },
+  "devDependencies": {
+    "@types/bytebuffer": "^5.0.37",
+    "@types/config": "0.0.34",
+    "@types/debug": "0.0.30",
+    "@types/express": "^4.16.0",
+    "@types/jest": "^23.3.1",
+    "@types/lodash": "^4.14.116",
+    "@types/node": "^10.5.7",
+    "@types/winston": "^2.3.7",
+    "concurrently": "^3.6.1",
+    "eslint": "^5.3.0",
+    "jest": "^23.4.2",
+    "nodemon": "^1.18.3",
+    "ts-jest": "^23.1.3",
+    "ts-node": "^7.0.0",
+    "tslint": "^5.11.0",
+    "tslint-config-airbnb": "^5.9.2",
+    "typescript": "^2.9.2"
+  }
+}
