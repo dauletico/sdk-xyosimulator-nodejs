@@ -4,12 +4,12 @@
  * @Email: developer@xyfindables.com
  * @Filename: xyo-node.ts
  * @Last modified by: ryanxyo
- * @Last modified time: Monday, 13th August 2018 10:30:23 am
+ * @Last modified time: Monday, 13th August 2018 1:40:25 pm
  * @License: All Rights Reserved
  * @Copyright: Copyright XY | The Findables Company
  */
 
-import { IDiscoverable } from '../types';
+import { IDiscoverable, INetworkExcludeContainer } from '../types';
 import debugLib from 'debug';
 import XYOBase from '../xyo-base';
 import { default as express, Express, Request, Response, NextFunction } from 'express';
@@ -46,6 +46,7 @@ export class XYONode extends XYOBase {
     public readonly host: string,
     public readonly ports: PortsContainer,
     public readonly isDiscoverable: boolean,
+    private readonly maxPeers: number,
     private readonly nodeDiscoveryService: NodeDiscoveryService,
     private readonly logger: Logger
   ) {
@@ -72,7 +73,16 @@ export class XYONode extends XYOBase {
   public async discoverOtherNodesOnSubnet(discoveryType: DISCOVERY_TYPE): Promise<void> {
     this.log(`discoverOtherNodesOnSubnet`);
     this.nodeDiscoveryService.onPeerDiscovered(this.onPeerDiscovered.bind(this));
-    this.nodeDiscoveryService.discoverPeers(discoveryType);
+
+    /**
+     * Build exclusion container. At this point, it should only be this node
+     */
+    const portExclude: { [s: string]: boolean } = {};
+    const exclude: INetworkExcludeContainer = {};
+    portExclude[this.ports.http] = true;
+    exclude[this.host] = portExclude;
+
+    this.nodeDiscoveryService.discoverPeers(discoveryType, exclude, this.maxPeers);
   }
 
   public getType(): XYOComponentType {

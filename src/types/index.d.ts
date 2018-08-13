@@ -4,7 +4,7 @@
  * @Email: developer@xyfindables.com
  * @Filename: index.d.ts
  * @Last modified by: ryanxyo
- * @Last modified time: Monday, 13th August 2018 10:30:23 am
+ * @Last modified time: Monday, 13th August 2018 1:24:30 pm
  * @License: All Rights Reserved
  * @Copyright: Copyright XY | The Findables Company
  */
@@ -41,4 +41,8 @@ export interface IDiscoverable {
     port: number
   }[];
   peers: {[s: string]: IDiscoverable[]}
+}
+
+export interface INetworkExcludeContainer {
+  [host: string]: { [port: string]: boolean };
 }

@@ -29,6 +29,7 @@ export function tryCreateNodeFromComponentType(
         httpPort: number,
         socketPort: number,
         isDiscoverable: boolean,
+        maxPeers: number,
         nodeDiscoveryService: NodeDiscoveryService,
         logger: Logger
       ) => {
@@ -40,6 +41,7 @@ export function tryCreateNodeFromComponentType(
             socket: socketPort
           },
           isDiscoverable,
+          maxPeers,
           nodeDiscoveryService,
           logger
         );
@@ -52,6 +54,7 @@ export function tryCreateNodeFromComponentType(
         httpPort: number,
         socketPort: number,
         isDiscoverable: boolean,
+        maxPeers: number,
         nodeDiscoveryService: NodeDiscoveryService,
         logger: Logger
       ) => {
@@ -63,6 +66,7 @@ export function tryCreateNodeFromComponentType(
             socket: socketPort
           },
           isDiscoverable,
+          maxPeers,
           nodeDiscoveryService,
           logger
         );
@@ -75,6 +79,7 @@ export function tryCreateNodeFromComponentType(
         httpPort: number,
         socketPort: number,
         isDiscoverable: boolean,
+        maxPeers: number,
         nodeDiscoveryService: NodeDiscoveryService,
         logger: Logger
       ) => {
@@ -86,6 +91,7 @@ export function tryCreateNodeFromComponentType(
             socket: socketPort
           },
           isDiscoverable,
+          maxPeers,
           nodeDiscoveryService,
           logger
         );
@@ -98,10 +104,11 @@ export function tryCreateNodeFromComponentType(
       httpPort: number,
       socketPort: number,
       isDiscoverable: boolean,
+      maxPeers: number,
       nodeDiscoveryService: NodeDiscoveryService,
       logger: Logger
       ) => {
-        return new XYOBridge(
+        return new XYODiviner(
           moniker,
           host,
           {
@@ -109,6 +116,7 @@ export function tryCreateNodeFromComponentType(
             socket: socketPort
           },
           isDiscoverable,
+          maxPeers,
           nodeDiscoveryService,
           logger
         );
@@ -124,6 +132,7 @@ export type XYONodeInitializer = (
   httpPort: number,
   socketPort: number,
   isDiscoverable: boolean,
+  maxPeers: number,
   nodeDiscoveryService: NodeDiscoveryService,
   logger: Logger
 ) => XYONode;

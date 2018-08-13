@@ -4,7 +4,7 @@
  * @Email: developer@xyfindables.com
  * @Filename: main.ts
  * @Last modified by: ryanxyo
- * @Last modified time: Monday, 13th August 2018 1:12:03 pm
+ * @Last modified time: Monday, 13th August 2018 1:46:56 pm
  * @License: All Rights Reserved
  * @Copyright: Copyright XY | The Findables Company
  */
@@ -38,7 +38,8 @@ async function init(
   host: string,
   httpPort: number,
   socketPort: number,
-  isDiscoverable: boolean
+  isDiscoverable: boolean,
+  maxPeers: number
 ) {
   logger.info(`
     ####################################
@@ -78,6 +79,7 @@ async function init(
     httpPort,
     socketPort,
     isDiscoverable,
+    maxPeers,
     nodeDiscoveryService,
     logger
   );
@@ -99,6 +101,7 @@ function main(args: string[]) {
     .option('-h, --host <value>', 'The moniker of the XYONode to add to the XYO Network')
     .option('-p, --httpPort <value>', 'The moniker of the XYONode to add to the XYO Network', parseInt)
     .option('-s, --socketPort <value>', 'The moniker of the XYONode to add to the XYO Network', parseInt)
+    .option('-n, --maxPeers <value>', 'The maximum number of peers the XYONode will try to find', parseInt)
     .option('-d, --isDiscoverable', 'The moniker of the XYONode to add to the XYO Network')
     .parse(args);
 
@@ -133,6 +136,10 @@ function main(args: string[]) {
     program.help();
     process.exit(-1);
   }
+  if (!program.maxPeers) {
+    logger.error(`A \`maxPeers\` option is required. Will exit`);
+    process.exit(-1);
+  }
 
   if (program.isDiscoverable === undefined) {
     logger.error(`A \`isDiscoverable\` option is required. Will exit`);
@@ -145,7 +152,8 @@ function main(args: string[]) {
     program.host  as string,
     program.httpPort as number,
     program.socketPort as number,
-    Boolean(program.isDiscoverable)
+    Boolean(program.isDiscoverable),
+    program.maxPeers
   );
 }
 
