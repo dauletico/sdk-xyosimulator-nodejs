@@ -4,7 +4,7 @@
  * @Email: developer@xyfindables.com
  * @Filename: main.ts
  * @Last modified by: ryanxyo
- * @Last modified time: Monday, 13th August 2018 10:30:23 am
+ * @Last modified time: Monday, 13th August 2018 1:12:03 pm
  * @License: All Rights Reserved
  * @Copyright: Copyright XY | The Findables Company
  */
@@ -16,63 +16,139 @@ import { NetworkHelperService } from './services/network-helper.service';
 import { NodeDiscoveryService, DISCOVERY_TYPE } from './services/node-discovery.service';
 
 import Logger from './logger';
-import { XYOArchivist } from './components/xyo-archivist';
-import { XYOBridge } from './components/xyo-bridge';
-import { XYODiviner } from './components/xyo-diviner';
+
+import program from 'commander';
+import { XYOComponentType } from './components/xyo-component-type.enum';
+import { tryCreateNodeFromComponentType } from './utils/xyo-node-initialize-type-mapper';
 
 const logger = new Logger();
 
-async function main() {
-  logger.info(`Running main`);
+/**
+ * Initializes an XYONode in the XYO Network
+ *
+ * @param moniker The name of the node
+ * @param host The host network value for this node
+ * @param httpPort What http port to listen on for this node
+ * @param socketPort What socket port to listen on for this node
+ * @param isDiscoverable If true, will make itself discoverable to other peers on the network
+ */
+async function init(
+  type: XYOComponentType,
+  moniker: string,
+  host: string,
+  httpPort: number,
+  socketPort: number,
+  isDiscoverable: boolean
+) {
+  logger.info(`
+    ####################################
+
+    Initializing
+      type: ${type}
+      Moniker: ${moniker}
+      host: ${host}
+      httpPort: ${httpPort}
+      socketPort: ${socketPort}
+      isDiscoverable: ${isDiscoverable}
+
+    ####################################
+  `);
+
+  /**
+   * This is composition root. We will initialize all the dependencies that are needed
+   * and inject them via constructor to the consumers
+   */
+
+   // create network helper service
   const networkHelperService = new NetworkHelperService();
 
-  // const nodeDiscoveryService = new NodeDiscoveryService(
-  //   networkHelperService,
-  //   [15555, 15556, 15557, 15558, 15559, 15560]
-  // );
+  // create nodeDiscoveryService
+  const nodeDiscoveryService = new NodeDiscoveryService(
+    networkHelperService,
+    [15555, 15556, 15557, 15558, 15559, 15560]
+  );
 
-  const node1 = new XYONode(
-    'N1',
-    '127.0.0.1',
-    { http: 15555, socket: 19555 },
-    true,
-    new NodeDiscoveryService(networkHelperService, [15555, 15556, 15557, 15558, 15559, 15560]),
+  // Given a XYOComponentType, get an initializer
+  const xyoNodeInitializerFn = tryCreateNodeFromComponentType(type);
+
+  // Create the node from the abstract initialization function
+  const xyoNode: XYONode = xyoNodeInitializerFn(
+    moniker,
+    host,
+    httpPort,
+    socketPort,
+    isDiscoverable,
+    nodeDiscoveryService,
     logger
   );
 
-  const node2 = new XYOArchivist(
-    'A2', '127.0.0.1',
-    { http: 15556, socket: 19556 },
-    true,
-    new NodeDiscoveryService(networkHelperService, [15555, 15556, 15557, 15558, 15559, 15560]),
-    logger
-  );
-
-  const node3 = new XYOBridge(
-    'B3',
-    '127.0.0.1',
-    { http: 15557, socket: 19557 },
-    true,
-    new NodeDiscoveryService(networkHelperService, [15555, 15556, 15557, 15558, 15559, 15560]),
-    logger
-  );
-
-  const node4 = new XYODiviner(
-    'D4',
-    '127.0.0.1',
-    { http: 15558, socket: 19558 },
-    true,
-    new NodeDiscoveryService(networkHelperService, [15555, 15556, 15557, 15558, 15559, 15560]),
-    logger
-  );
-
-  /** Delay 5s so that servers can get up and going */
-  setTimeout(() => {
-    node1.discoverOtherNodesOnSubnet(DISCOVERY_TYPE.LOCALHOST);
-    node2.discoverOtherNodesOnSubnet(DISCOVERY_TYPE.LOCALHOST);
-    node3.discoverOtherNodesOnSubnet(DISCOVERY_TYPE.LOCALHOST);
-    node4.discoverOtherNodesOnSubnet(DISCOVERY_TYPE.LOCALHOST);
-  }, 2000);
+  // Find other peers
+  xyoNode.discoverOtherNodesOnSubnet(DISCOVERY_TYPE.LOCALHOST);
 }
 
-main();
+/**
+ * Entry point to the application
+ * @param args An array of options to our program
+ */
+
+function main(args: string[]) {
+  program
+    .version(`0.1.0`)
+    .option('-t --type <type>', 'The type of XYO Node', /^(xyo-sentinel|xyo-bridge|xyo-archivist|xyo-diviner)$/i)
+    .option('-m, --moniker <value>', 'The moniker of the XYONode to add to the XYO Network')
+    .option('-h, --host <value>', 'The moniker of the XYONode to add to the XYO Network')
+    .option('-p, --httpPort <value>', 'The moniker of the XYONode to add to the XYO Network', parseInt)
+    .option('-s, --socketPort <value>', 'The moniker of the XYONode to add to the XYO Network', parseInt)
+    .option('-d, --isDiscoverable', 'The moniker of the XYONode to add to the XYO Network')
+    .parse(args);
+
+  /** Validation below. If a validation step fails, exit process with -1 code */
+
+  if (!program.type) {
+    logger.error(`A \`type\` option is required. Will exit`);
+    program.help();
+    process.exit(-1);
+  }
+
+  if (!program.moniker) {
+    logger.error(`A \`moniker\` option is required. Will exit`);
+    program.help();
+    process.exit(-1);
+  }
+
+  if (!program.host) {
+    logger.error(`A \`host\` option is required. Will exit`);
+    program.help();
+    process.exit(-1);
+  }
+
+  if (!program.httpPort) {
+    logger.error(`A \`httpPort\` option is required. Will exit`);
+    program.help();
+    process.exit(-1);
+  }
+
+  if (!program.socketPort) {
+    logger.error(`A \`socketPort\` option is required. Will exit`);
+    program.help();
+    process.exit(-1);
+  }
+
+  if (program.isDiscoverable === undefined) {
+    logger.error(`A \`isDiscoverable\` option is required. Will exit`);
+    process.exit(-1);
+  }
+
+  init(
+    program.type as XYOComponentType,
+    program.moniker as string,
+    program.host  as string,
+    program.httpPort as number,
+    program.socketPort as number,
+    Boolean(program.isDiscoverable)
+  );
+}
+
+if (require.main) {
+  main(process.argv);
+}

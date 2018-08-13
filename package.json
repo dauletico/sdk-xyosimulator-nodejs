@@ -17,13 +17,14 @@
     "tslint": "tslint -c tslint.json -p tsconfig.json",
     "tslint-fix": "tslint -c tslint.json -p tsconfig.json --fix",
     "debug": "npm run build && npm run watch-debug",
-    "serve-debug": "nodemon --inspect-brk=8081 dist/main.js",
+    "serve-debug": "nodemon --inspect=8081 dist/main.js -- -t archivist -m N1 -h 127.0.0.1 -p 15555 -s 19555 -d",
     "watch-debug": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"cyan.bold,green.bold\" \"npm run watch-ts\" \"npm run serve-debug\"",
     "precommit": "echo \"Build must pass before committing\" && npm run build"
   },
   "dependencies": {
     "binary": "^0.3.0",
     "bytebuffer": "^5.0.1",
+    "commander": "^2.17.1",
     "config": "^2.0.1",
     "debug": "^3.1.0",
     "express": "^4.16.3",
@@ -32,6 +33,7 @@
   },
   "devDependencies": {
     "@types/bytebuffer": "^5.0.37",
+    "@types/commander": "^2.12.2",
     "@types/config": "0.0.34",
     "@types/debug": "0.0.30",
     "@types/express": "^4.16.0",
