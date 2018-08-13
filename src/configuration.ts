@@ -5,17 +5,13 @@
  * @Email: developer@xyfindables.com
  * @Filename: configuration.ts
  * @Last modified by: ryanxyo
- * @Last modified time: Monday, 13th August 2018 10:30:23 am
+ * @Last modified time: Monday, 13th August 2018 4:03:12 pm
  * @License: All Rights Reserved
  * @Copyright: Copyright XY | The Findables Company
  */
 
 import config from 'config';
-import { IPortsConfig } from './types';
-import { PortsContainer } from './utils/ports-container';
+import { IKnownNode } from './types';
 
-const portsList = config.get('xyo.nodes.discovery.subnet.ports') as IPortsConfig[];
-
-export const subnetPorts = portsList.map((subnetPort) => {
-  return new PortsContainer(subnetPort.http, subnetPort.socket);
-});
+export const subnetPorts = config.get('xyo.nodes.discovery.subnet.ports') as number[];
+export const knownNodes = config.get('xyo.nodes.discovery.knownNodes') as IKnownNode[];

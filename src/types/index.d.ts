@@ -4,7 +4,7 @@
  * @Email: developer@xyfindables.com
  * @Filename: index.d.ts
  * @Last modified by: ryanxyo
- * @Last modified time: Monday, 13th August 2018 1:24:30 pm
+ * @Last modified time: Monday, 13th August 2018 4:20:34 pm
  * @License: All Rights Reserved
  * @Copyright: Copyright XY | The Findables Company
  */
@@ -26,11 +26,13 @@ export interface IDiscoveryConfig {
 }
 
 export interface ISubnetConfig {
-  ports: IPortsConfig[]
+  ports: string[]
 }
 
-/** Create an alias to reduce coupling */
-export type IPortsConfig = PortsContainer;
+export interface IKnownNode {
+  hostname: string;
+  port: number;
+}
 
 export interface IDiscoverable {
   moniker: string;
@@ -44,5 +46,10 @@ export interface IDiscoverable {
 }
 
 export interface INetworkExcludeContainer {
-  [host: string]: { [port: string]: boolean };
+  byNetworkAddress: {
+    [host: string]: { [port: string]: boolean };
+  },
+  byMoniker: {
+    [moniker: string]: boolean;
+  }
 }

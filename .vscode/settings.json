@@ -5,6 +5,7 @@
     "biginteger",
     "bytebuffer",
     "chainable",
+    "discoverables",
     "promisify",
     "ryanxyo",
     "xyfindables"

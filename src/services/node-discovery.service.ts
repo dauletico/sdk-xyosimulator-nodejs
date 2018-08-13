@@ -4,16 +4,17 @@
  * @Email: developer@xyfindables.com
  * @Filename: node-discovery.service.ts
  * @Last modified by: ryanxyo
- * @Last modified time: Monday, 13th August 2018 1:39:09 pm
+ * @Last modified time: Monday, 13th August 2018 4:25:00 pm
  * @License: All Rights Reserved
  * @Copyright: Copyright XY | The Findables Company
  */
 
 import { NetworkHelperService } from './network-helper.service';
 import http from 'http';
-import { IDiscoverable, INetworkExcludeContainer } from '../types';
+import { IDiscoverable, INetworkExcludeContainer, IKnownNode } from '../types';
 import debugLib from 'debug';
 import { EventEmitter } from 'events';
+import _ from 'lodash';
 
 const debug = debugLib('NodeDiscoveryService');
 
@@ -21,7 +22,8 @@ export class NodeDiscoveryService extends EventEmitter {
 
   constructor(
     private readonly networkHelperService: NetworkHelperService,
-    private readonly portRange: number[]
+    private readonly portRange: number[],
+    private readonly knownNodes: IKnownNode[]
   ) {
     super();
   }
@@ -32,21 +34,21 @@ export class NodeDiscoveryService extends EventEmitter {
     maxPeers: number
   ): Promise<IDiscoverable[]> {
     debug(`discoverPeers`, discoveryType);
+
     switch (discoveryType) {
       case DISCOVERY_TYPE.LOCALHOST:
         return this.findLocalPeers(exclude, maxPeers);
       case DISCOVERY_TYPE.SUBNET:
         return this.findPeersOnSameSubnet(exclude, maxPeers);
       case DISCOVERY_TYPE.REMOTE:
-        throw new Error(`DISCOVERY_TYPE.REMOTE: Not yet implemented`);
+        return this.findPeersFromKnownNodes(exclude, maxPeers);
       default:
         throw new Error(`A discoveryType must be specified`);
     }
   }
-
   public async findLocalPeers(exclude: INetworkExcludeContainer, maxPeers: number): Promise<IDiscoverable[]> {
     debug(`findLocalPeers`);
-    return this.findPeersOnIP('127.0.0.1', exclude, maxPeers);
+    return this.findPeersOnHost('127.0.0.1', this.portRange, exclude, maxPeers);
   }
 
   public async findPeersOnSameSubnet(exclude: INetworkExcludeContainer, maxPeers: number): Promise<IDiscoverable[]> {
@@ -57,15 +59,17 @@ export class NodeDiscoveryService extends EventEmitter {
       throw new Error(`Could not find an ip address`);
     }
 
-    return this.findPeersOnIP(myIP, exclude, maxPeers);
+    return this.findPeersOnHost(myIP, this.portRange, exclude, maxPeers);
   }
 
-  public async findPeersOnIP(
-    ip: string,
+  public async findPeersOnHost(
+    host: string,
+    ports: number[] | number,
     exclude: INetworkExcludeContainer,
     maxPeers: number
   ): Promise<IDiscoverable[]> {
-    debug(`findPeersOnIP`, this.portRange, ip, exclude);
+    const portRange = _.castArray(ports);
+    debug(`findPeersOnIP`, portRange, host, exclude);
 
     /*
      * A serialized way of find iterating through candidates.
@@ -73,25 +77,29 @@ export class NodeDiscoveryService extends EventEmitter {
      * Iterates through candidates, tests to see if they are a nodes, and if so adds them to the node-list
      */
 
-    return this.portRange.reduce(async (promiseChain, discoveryCandidate) => {
+    return portRange.reduce(async (promiseChain, discoveryCandidate) => {
       debug(`PortRangeReducer`);
 
       const existingNodes = await promiseChain; // get current list
 
       // Test to see if probeAddress is excluded or if max peers have been reached
       if (
-        (exclude && exclude[ip] && exclude[ip][discoveryCandidate]) ||
+        (exclude.byNetworkAddress[host] && exclude.byNetworkAddress[host][discoveryCandidate]) ||
         existingNodes.length >= maxPeers
       ) {
         return existingNodes;
       }
 
-      const discoverInterfaceCandidate = await this.probeAddress(ip, discoveryCandidate); // test if candidate is a node
+      // test if candidate is a node
+      const discoverInterfaceCandidate = await this.probeAddress(host, discoveryCandidate);
 
-      if (discoverInterfaceCandidate) { // if it is a node append it to list
+      if (
+        discoverInterfaceCandidate &&
+        !exclude.byMoniker[discoverInterfaceCandidate.moniker]
+      ) { // if it is a node append it to list
         debug(`Found a node on the network: ${discoveryCandidate.toString()}\n`);
         existingNodes.push(discoverInterfaceCandidate); // Make a copy and add it to list
-        this.emit(`peerDiscovered`, discoverInterfaceCandidate);
+        this.emit(`peer:discovered`, discoverInterfaceCandidate);
       } else {
         debug(`Node not found on the network: ${discoveryCandidate.toString()}\n`);
       }
@@ -101,7 +109,20 @@ export class NodeDiscoveryService extends EventEmitter {
   }
 
   public onPeerDiscovered(listener: (peer: IDiscoverable) => void): void {
-    this.on(`peerDiscovered`, listener);
+    this.on(`peer:discovered`, listener);
+  }
+
+  private async findPeersFromKnownNodes(
+    exclude: INetworkExcludeContainer,
+    maxPeers: number
+  ): Promise<IDiscoverable[]> {
+    debug(`findPeersFromKnownNodes`);
+
+    return this.knownNodes.reduce(async (promiseChain: Promise<IDiscoverable[]>, knownDomain: IKnownNode) => {
+      const discoverables = await promiseChain;
+      const newDiscoverables = await this.findPeersOnHost(knownDomain.hostname, knownDomain.port, exclude, maxPeers);
+      return _.concat([], discoverables, newDiscoverables);
+    }, Promise.resolve([]));
   }
 
   /**
@@ -112,14 +133,14 @@ export class NodeDiscoveryService extends EventEmitter {
    * @return returns true if the address is an xyo-node, false otherwise
    */
 
-  private async probeAddress(ip: string, port: number): Promise<IDiscoverable|null> {
+  private async probeAddress(hostname: string, port: number): Promise<IDiscoverable|null> {
     debug(`probeAddress`);
 
     return new Promise((resolve, reject) => {
       const request = http.get({
-        hostname: ip,
+        hostname,
         port,
-        path: '/xyo-ping',
+        path: '/xyo-status',
         agent: false
       }, (response) => {
         if (response.statusCode !== 200) { // TODO make more robust

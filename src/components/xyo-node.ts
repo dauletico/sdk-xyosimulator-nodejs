@@ -4,7 +4,7 @@
  * @Email: developer@xyfindables.com
  * @Filename: xyo-node.ts
  * @Last modified by: ryanxyo
- * @Last modified time: Monday, 13th August 2018 1:40:25 pm
+ * @Last modified time: Monday, 13th August 2018 4:22:49 pm
  * @License: All Rights Reserved
  * @Copyright: Copyright XY | The Findables Company
  */
@@ -24,6 +24,8 @@ import { NetworkProtocol } from '../utils/network-protocol.enum';
 const debug = debugLib('Node');
 
 export class XYONode extends XYOBase {
+  /** If true, will continue run run-loop */
+  public doLoop: boolean = false;
 
   /** Our http server we will be servicing requests on */
   private httpServer: Express;
@@ -52,6 +54,7 @@ export class XYONode extends XYOBase {
   ) {
     super();
     this.log(`constructor`);
+    this.nodeDiscoveryService.onPeerDiscovered(this.onPeerDiscovered.bind(this));
     this.httpServer = express();
     this.httpServer.listen(this.ports.http);
 
@@ -59,10 +62,11 @@ export class XYONode extends XYOBase {
      * A type safe way of initializing peers object.
      * Initialize peers object by iterating through component types.
      */
-    this.peers = Object.keys(XYOComponentType).reduce((memo: {[s: string]: IDiscoverable[]}, value) => {
-      memo[value] = [];
-      return memo;
-    }, {});
+    this.peers = Object.keys(XYOComponentType)
+      .reduce((memo: {[s: string]: IDiscoverable[]}, value) => {
+        memo[value] = [];
+        return memo;
+      }, {});
 
     this.addHTTPRoutes();
 
@@ -70,29 +74,113 @@ export class XYONode extends XYOBase {
     this.socketServer.listen(this.ports.socket);
   }
 
-  public async discoverOtherNodesOnSubnet(discoveryType: DISCOVERY_TYPE): Promise<void> {
-    this.log(`discoverOtherNodesOnSubnet`);
-    this.nodeDiscoveryService.onPeerDiscovered(this.onPeerDiscovered.bind(this));
-
-    /**
-     * Build exclusion container. At this point, it should only be this node
-     */
-    const portExclude: { [s: string]: boolean } = {};
-    const exclude: INetworkExcludeContainer = {};
-    portExclude[this.ports.http] = true;
-    exclude[this.host] = portExclude;
-
-    this.nodeDiscoveryService.discoverPeers(discoveryType, exclude, this.maxPeers);
-  }
-
   public getType(): XYOComponentType {
     return XYOComponentType.XYONode;
+  }
+
+  public getPeerCount(): number {
+    return Object.keys(this.peers).reduce((sum, peerCollectionType) => {
+      return sum + this.peers[peerCollectionType].length;
+    }, 0);
+  }
+
+  public run(): { stop: () => void } {
+    this.doLoop = true;
+    this.loop();
+    return {
+      stop: () => {
+        this.doLoop = false;
+      }
+    };
+  }
+
+  private async loop(): Promise<void> {
+    this.log(`Loop`);
+    if (this.doLoop) {
+      await this.startDiscovering();
+    }
+
+    setTimeout(() => {
+      this.loop();
+    }, 1000);
+  }
+
+  private async startDiscovering() {
+    this.log(`startDiscovering`);
+
+    if (this.getPeerCount() >= this.maxPeers) {
+      return;
+    }
+
+    await this.discoverPeers(DISCOVERY_TYPE.LOCALHOST);
+    if (this.getPeerCount() >= this.maxPeers) {
+      return;
+    }
+
+    await this.discoverPeers(DISCOVERY_TYPE.SUBNET);
+    if (this.getPeerCount() >= this.maxPeers) {
+      return;
+    }
+
+    await this.discoverPeers(DISCOVERY_TYPE.REMOTE);
+    if (this.getPeerCount() >= this.maxPeers) {
+      return;
+    }
+  }
+
+  private async discoverPeers(discoveryType: DISCOVERY_TYPE): Promise<void> {
+    this.log(`discoverOtherNodesOnSubnet`);
+
+    await this.nodeDiscoveryService.discoverPeers(
+      discoveryType,
+      this.buildExclusions(),
+      this.maxPeers
+    );
+
+    return;
+  }
+
+  /**
+   * Builds Exclusion map
+   */
+  private buildExclusions(): INetworkExcludeContainer {
+    const startingExclusions: INetworkExcludeContainer = {
+      byNetworkAddress: {},
+      byMoniker: {}
+    };
+
+    startingExclusions.byNetworkAddress[this.host] = {};
+    startingExclusions.byNetworkAddress[this.host][this.ports.http] = true;
+
+    return Object.keys(this.peers).reduce((exclude: INetworkExcludeContainer, peerType) => {
+      const peersByType = this.peers[peerType];
+
+      peersByType.forEach((peer) => {
+        exclude.byMoniker[peer.moniker] = true;
+        exclude.byNetworkAddress[peer.host] = exclude.byNetworkAddress[peer.host] || {};
+        const hostPeers = exclude.byNetworkAddress[peer.host];
+        const httpProtocol = peer.protocols.filter((protocol) => {
+          return protocol.type === NetworkProtocol.HTTP || protocol.type === NetworkProtocol.HTTPS;
+        });
+
+        if (httpProtocol.length === 0) {
+          return;
+        }
+
+        hostPeers[httpProtocol[0].port] = true;
+      });
+
+      return exclude;
+    }, startingExclusions);
   }
 
   private addHTTPRoutes() {
     this.log(`addHttpRoutes`);
 
-    this.httpServer.get(`/xyo-ping`, (req: Request, res: Response, next: NextFunction) => {
+    /**
+     * Expose http route @ GET /xyo-status
+     */
+    this.httpServer.get(`/xyo-status`, (req: Request, res: Response, next: NextFunction) => {
       if (!this.isDiscoverable) {
         return next();
       }

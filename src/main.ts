@@ -4,12 +4,12 @@
  * @Email: developer@xyfindables.com
  * @Filename: main.ts
  * @Last modified by: ryanxyo
- * @Last modified time: Monday, 13th August 2018 1:46:56 pm
+ * @Last modified time: Monday, 13th August 2018 4:03:15 pm
  * @License: All Rights Reserved
  * @Copyright: Copyright XY | The Findables Company
  */
 
-process.env.DEBUG = 'Node,NodeDiscoveryService'; // print debug messages for everything
+process.env.DEBUG = 'Node,NodeDiscoveryService'; // print debug messages
 
 import { XYONode } from './components/xyo-node';
 import { NetworkHelperService } from './services/network-helper.service';
@@ -20,6 +20,7 @@ import Logger from './logger';
 import program from 'commander';
 import { XYOComponentType } from './components/xyo-component-type.enum';
 import { tryCreateNodeFromComponentType } from './utils/xyo-node-initialize-type-mapper';
+import { knownNodes, subnetPorts } from './configuration';
 
 const logger = new Logger();
 
@@ -66,7 +67,8 @@ async function init(
   // create nodeDiscoveryService
   const nodeDiscoveryService = new NodeDiscoveryService(
     networkHelperService,
-    [15555, 15556, 15557, 15558, 15559, 15560]
+    subnetPorts,
+    knownNodes
   );
 
   // Given a XYOComponentType, get an initializer
@@ -85,7 +87,7 @@ async function init(
   );
 
   // Find other peers
-  xyoNode.discoverOtherNodesOnSubnet(DISCOVERY_TYPE.LOCALHOST);
+  xyoNode.run();
 }
 
 /**
