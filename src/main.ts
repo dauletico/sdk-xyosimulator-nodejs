@@ -4,7 +4,7 @@
  * @Email: developer@xyfindables.com
  * @Filename: main.ts
  * @Last modified by: ryanxyo
- * @Last modified time: Monday, 13th August 2018 4:03:15 pm
+ * @Last modified time: Monday, 13th August 2018 6:02:21 pm
  * @License: All Rights Reserved
  * @Copyright: Copyright XY | The Findables Company
  */
@@ -21,6 +21,8 @@ import program from 'commander';
 import { XYOComponentType } from './components/xyo-component-type.enum';
 import { tryCreateNodeFromComponentType } from './utils/xyo-node-initialize-type-mapper';
 import { knownNodes, subnetPorts } from './configuration';
+import { PeersRepository } from './data/peers.repository';
+import { DiscoveryDelegate } from './services/discovery-delegate';
 
 const logger = new Logger();
 
@@ -64,12 +66,23 @@ async function init(
    // create network helper service
   const networkHelperService = new NetworkHelperService();
 
+  // DataSource for peers
+  const peersRepository = new PeersRepository(
+    maxPeers,
+    moniker,
+    [{ host, port: httpPort }]
+  );
+
   // create nodeDiscoveryService
   const nodeDiscoveryService = new NodeDiscoveryService(
     networkHelperService,
     subnetPorts,
-    knownNodes
+    knownNodes,
+    peersRepository
   );
+
+  // The delegate will be abstraction through which an xyo-node discovers other nodes
+  const discoveryDelegate = new DiscoveryDelegate(nodeDiscoveryService, peersRepository, maxPeers);
 
   // Given a XYOComponentType, get an initializer
   const xyoNodeInitializerFn = tryCreateNodeFromComponentType(type);
@@ -81,8 +94,7 @@ async function init(
     httpPort,
     socketPort,
     isDiscoverable,
-    maxPeers,
-    nodeDiscoveryService,
+    discoveryDelegate,
     logger
   );
 

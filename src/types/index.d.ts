@@ -4,7 +4,7 @@
  * @Email: developer@xyfindables.com
  * @Filename: index.d.ts
  * @Last modified by: ryanxyo
- * @Last modified time: Monday, 13th August 2018 4:20:34 pm
+ * @Last modified time: Tuesday, 14th August 2018 9:46:51 am
  * @License: All Rights Reserved
  * @Copyright: Copyright XY | The Findables Company
  */
@@ -38,18 +38,24 @@ export interface IDiscoverable {
   moniker: string;
   host: string;
   type: XYOComponentType;
-  protocols: {
-    type: NetworkProtocol
-    port: number
-  }[];
+  httpPort: number;
+  socketPort: number;
   peers: {[s: string]: IDiscoverable[]}
 }
 
-export interface INetworkExcludeContainer {
+export interface IDiscoverableIndex {
   byNetworkAddress: {
     [host: string]: { [port: string]: boolean };
   },
   byMoniker: {
     [moniker: string]: boolean;
+  },
+  byType: {
+    [s: string]: IDiscoverable[]
   }
+}
+
+export interface INetworkAddress {
+  host: string, 
+  port: number
 }

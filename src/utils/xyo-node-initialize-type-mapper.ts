@@ -10,13 +10,13 @@
  */
 
 import { XYOComponentType } from '../components/xyo-component-type.enum';
-import NodeDiscoveryService from '../services/node-discovery.service';
 import { XYONode } from '../components/xyo-node';
 import Logger from '../logger';
 import { XYOArchivist } from '../components/xyo-archivist';
 import { XYOSentinel } from '../components/xyo-sentinel';
 import { XYOBridge } from '../components/xyo-bridge';
 import { XYODiviner } from '../components/xyo-diviner';
+import { DiscoveryDelegate } from '../services/discovery-delegate';
 
 export function tryCreateNodeFromComponentType(
   type: XYOComponentType
@@ -29,8 +29,7 @@ export function tryCreateNodeFromComponentType(
         httpPort: number,
         socketPort: number,
         isDiscoverable: boolean,
-        maxPeers: number,
-        nodeDiscoveryService: NodeDiscoveryService,
+        discoveryDelegate: DiscoveryDelegate,
         logger: Logger
       ) => {
         return new XYOArchivist(
@@ -41,8 +40,7 @@ export function tryCreateNodeFromComponentType(
             socket: socketPort
           },
           isDiscoverable,
-          maxPeers,
-          nodeDiscoveryService,
+          discoveryDelegate,
           logger
         );
       };
@@ -54,8 +52,7 @@ export function tryCreateNodeFromComponentType(
         httpPort: number,
         socketPort: number,
         isDiscoverable: boolean,
-        maxPeers: number,
-        nodeDiscoveryService: NodeDiscoveryService,
+        discoveryDelegate: DiscoveryDelegate,
         logger: Logger
       ) => {
         return new XYOSentinel(
@@ -66,8 +63,7 @@ export function tryCreateNodeFromComponentType(
             socket: socketPort
           },
           isDiscoverable,
-          maxPeers,
-          nodeDiscoveryService,
+          discoveryDelegate,
           logger
         );
       };
@@ -79,8 +75,7 @@ export function tryCreateNodeFromComponentType(
         httpPort: number,
         socketPort: number,
         isDiscoverable: boolean,
-        maxPeers: number,
-        nodeDiscoveryService: NodeDiscoveryService,
+        discoveryDelegate: DiscoveryDelegate,
         logger: Logger
       ) => {
         return new XYOBridge(
@@ -91,22 +86,20 @@ export function tryCreateNodeFromComponentType(
             socket: socketPort
           },
           isDiscoverable,
-          maxPeers,
-          nodeDiscoveryService,
+          discoveryDelegate,
           logger
         );
       };
 
     case XYOComponentType.XYODiviner:
       return (
-      moniker: string,
-      host: string,
-      httpPort: number,
-      socketPort: number,
-      isDiscoverable: boolean,
-      maxPeers: number,
-      nodeDiscoveryService: NodeDiscoveryService,
-      logger: Logger
+        moniker: string,
+        host: string,
+        httpPort: number,
+        socketPort: number,
+        isDiscoverable: boolean,
+        discoveryDelegate: DiscoveryDelegate,
+        logger: Logger
       ) => {
         return new XYODiviner(
           moniker,
@@ -116,8 +109,7 @@ export function tryCreateNodeFromComponentType(
             socket: socketPort
           },
           isDiscoverable,
-          maxPeers,
-          nodeDiscoveryService,
+          discoveryDelegate,
           logger
         );
       };
@@ -132,7 +124,6 @@ export type XYONodeInitializer = (
   httpPort: number,
   socketPort: number,
   isDiscoverable: boolean,
-  maxPeers: number,
-  nodeDiscoveryService: NodeDiscoveryService,
+  discoveryDelegate: DiscoveryDelegate,
   logger: Logger
 ) => XYONode;
