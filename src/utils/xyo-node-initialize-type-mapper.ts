@@ -18,9 +18,7 @@ import { XYOBridge } from '../components/xyo-bridge';
 import { XYODiviner } from '../components/xyo-diviner';
 import { DiscoveryDelegate } from '../services/discovery-delegate';
 
-export function tryCreateNodeFromComponentType(
-  type: XYOComponentType
-): XYONodeInitializer {
+export function tryCreateNodeFromComponentType(type: XYOComponentType): XYONodeInitializer {
   switch (type) {
     case XYOComponentType.XYOArchivist:
       return (
@@ -35,10 +33,8 @@ export function tryCreateNodeFromComponentType(
         return new XYOArchivist(
           moniker,
           host,
-          {
-            http: httpPort,
-            socket: socketPort
-          },
+          httpPort,
+          socketPort,
           isDiscoverable,
           discoveryDelegate,
           logger
@@ -58,10 +54,8 @@ export function tryCreateNodeFromComponentType(
         return new XYOSentinel(
           moniker,
           host,
-          {
-            http: httpPort,
-            socket: socketPort
-          },
+          httpPort,
+          socketPort,
           isDiscoverable,
           discoveryDelegate,
           logger
@@ -81,10 +75,8 @@ export function tryCreateNodeFromComponentType(
         return new XYOBridge(
           moniker,
           host,
-          {
-            http: httpPort,
-            socket: socketPort
-          },
+          httpPort,
+          socketPort,
           isDiscoverable,
           discoveryDelegate,
           logger
@@ -104,10 +96,8 @@ export function tryCreateNodeFromComponentType(
         return new XYODiviner(
           moniker,
           host,
-          {
-            http: httpPort,
-            socket: socketPort
-          },
+          httpPort,
+          socketPort,
           isDiscoverable,
           discoveryDelegate,
           logger

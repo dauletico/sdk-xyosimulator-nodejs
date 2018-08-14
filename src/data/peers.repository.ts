@@ -4,15 +4,16 @@
  * @Email:  developer@xyfindables.com
  * @Filename: peers.repository.ts
  * @Last modified by: ryanxyo
- * @Last modified time: Tuesday, 14th August 2018 9:04:16 am
+ * @Last modified time: Tuesday, 14th August 2018 1:15:25 pm
  * @License: All Rights Reserved
  * @Copyright: Copyright XY | The Findables Company
  */
 
 import { IDiscoverableIndex, IDiscoverable, INetworkAddress } from '../types';
 import _ from 'lodash';
+import XYOBase from '../xyo-base';
 
-export class PeersRepository implements IPeersRepository {
+export class PeersRepository extends XYOBase implements IPeersRepository {
   public index: IDiscoverableIndex = {
     byMoniker: {},
     byNetworkAddress: {},
@@ -32,6 +33,7 @@ export class PeersRepository implements IPeersRepository {
     private readonly excludeMoniker: string,
     private readonly excludeAddresses: INetworkAddress[]
   ) {
+    super();
   }
 
   public async shouldExcludePeerWithMoniker(moniker: string): Promise<boolean> {

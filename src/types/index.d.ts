@@ -4,12 +4,11 @@
  * @Email: developer@xyfindables.com
  * @Filename: index.d.ts
  * @Last modified by: ryanxyo
- * @Last modified time: Tuesday, 14th August 2018 9:46:51 am
+ * @Last modified time: Tuesday, 14th August 2018 2:13:26 pm
  * @License: All Rights Reserved
  * @Copyright: Copyright XY | The Findables Company
  */
 
-import { PortsContainer } from "../utils/ports-container";
 import { NetworkProtocol } from "../utils/network-protocol.enum";
 import { XYOComponentType } from "../components/xyo-component-type.enum";
 

@@ -4,21 +4,22 @@
  * @Email: developer@xyfindables.com
  * @Filename: node-discovery.service.ts
  * @Last modified by: ryanxyo
- * @Last modified time: Monday, 13th August 2018 6:02:49 pm
+ * @Last modified time: Tuesday, 14th August 2018 2:18:14 pm
  * @License: All Rights Reserved
  * @Copyright: Copyright XY | The Findables Company
  */
 
 import { NetworkHelperService } from './network-helper.service';
 import http from 'http';
-import { IDiscoverable, IDiscoverableIndex, IKnownNode } from '../types';
-import debugLib from 'debug';
+import { IDiscoverable, IKnownNode, INetworkAddress } from '../types';
 import { EventEmitter } from 'events';
 import _ from 'lodash';
 import { PeersRepository } from '../data/peers.repository';
+import { XYOBase } from '../xyo-base';
 
-const debug = debugLib('NodeDiscoveryService');
-export class NodeDiscoveryService extends EventEmitter {
+export class NodeDiscoveryService extends XYOBase {
+
+  private readonly eventEmitter = new EventEmitter();
 
   constructor(
     private readonly networkHelperService: NetworkHelperService,
@@ -33,7 +34,7 @@ export class NodeDiscoveryService extends EventEmitter {
     discoveryType: DISCOVERY_TYPE,
     maxPeers: number
   ): Promise<IDiscoverable[]> {
-    debug(`discoverPeers`, discoveryType);
+    this.debug(`discoverPeers`, discoveryType);
 
     switch (discoveryType) {
       case DISCOVERY_TYPE.LOCALHOST:
@@ -47,12 +48,12 @@ export class NodeDiscoveryService extends EventEmitter {
     }
   }
   public async findLocalPeers(maxPeers: number): Promise<IDiscoverable[]> {
-    debug(`findLocalPeers`);
+    this.debug(`findLocalPeers`);
     return this.findPeersOnHost('127.0.0.1', this.portRange, maxPeers);
   }
 
   public async findPeersOnSameSubnet(maxPeers: number): Promise<IDiscoverable[]> {
-    debug(`findPeersOnSameSubnet`);
+    this.debug(`findPeersOnSameSubnet`);
     const myIP = this.networkHelperService.getLocalIPAddress();
 
     if (!myIP) {
@@ -62,13 +63,23 @@ export class NodeDiscoveryService extends EventEmitter {
     return this.findPeersOnHost(myIP, this.portRange, maxPeers);
   }
 
+  public async findPeersFromList(addresses: INetworkAddress[], maxPeers: number): Promise<IDiscoverable[]> {
+    this.debug(`findPeersFromList`);
+
+    return addresses.reduce(async (promiseChain: Promise<IDiscoverable[]>, address: INetworkAddress) => {
+      const discoverables = await promiseChain;
+      const newDiscoverables = await this.findPeersOnHost(address.host, address.port, maxPeers);
+      return _.concat([], discoverables, newDiscoverables);
+    }, Promise.resolve([]));
+  }
+
   public async findPeersOnHost(
     host: string,
     ports: number[] | number,
     maxPeers: number
   ): Promise<IDiscoverable[]> {
     const portRange = _.castArray(ports);
-    debug(`findPeersOnIP`, portRange, host);
+    this.debug(`findPeersOnIP`, portRange, host);
 
     /*
      * A serialized way of find iterating through candidates.
@@ -77,7 +88,7 @@ export class NodeDiscoveryService extends EventEmitter {
      */
 
     return portRange.reduce(async (promiseChain, discoveryCandidate) => {
-      debug(`PortRangeReducer`);
+      this.debug(`PortRangeReducer`);
 
       const existingNodes = await promiseChain; // get current list
 
@@ -107,20 +118,20 @@ export class NodeDiscoveryService extends EventEmitter {
       }
 
       existingNodes.push(discoverInterfaceCandidate);
-      this.emit(`peer:discovered`, discoverInterfaceCandidate);
+      this.eventEmitter.emit(`peer:discovered`, discoverInterfaceCandidate);
 
       return existingNodes;
     }, Promise.resolve([]) as Promise<IDiscoverable[]>);
   }
 
   public onPeerDiscovered(listener: (peer: IDiscoverable) => void): void {
-    this.on(`peer:discovered`, listener);
+    this.eventEmitter.on(`peer:discovered`, listener);
   }
 
   private async findPeersFromKnownNodes(
     maxPeers: number
   ): Promise<IDiscoverable[]> {
-    debug(`findPeersFromKnownNodes`);
+    this.debug(`findPeersFromKnownNodes`);
 
     return this.knownNodes.reduce(async (promiseChain: Promise<IDiscoverable[]>, knownDomain: IKnownNode) => {
       const discoverables = await promiseChain;
@@ -138,7 +149,7 @@ export class NodeDiscoveryService extends EventEmitter {
    */
 
   private async probeAddress(hostname: string, port: number): Promise<IDiscoverable|null> {
-    debug(`probeAddress`);
+    this.debug(`probeAddress`);
 
     return new Promise((resolve, reject) => {
       const request = http.get({
@@ -175,7 +186,7 @@ export class NodeDiscoveryService extends EventEmitter {
   }
 
   private validateProbeResponseBody(body: string): IDiscoverable | null {
-    debug(`validateProbeResponseBody`);
+    this.debug(`validateProbeResponseBody`);
 
     try {
       const jsonBody = JSON.parse(body);

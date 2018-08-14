@@ -4,19 +4,20 @@
  * @Email: developer@xyfindables.com
  * @Filename: bit-stream-decoder.ts
  * @Last modified by: ryanxyo
- * @Last modified time: Monday, 13th August 2018 10:30:23 am
+ * @Last modified time: Tuesday, 14th August 2018 1:16:43 pm
  * @License: All Rights Reserved
  * @Copyright: Copyright XY | The Findables Company
  */
 
 import { default as binary, ChainableBinary } from 'binary';
 import { BridgePayload } from '../data/bridge-payload';
+import XYOBase from '../xyo-base';
 
 const byteToFunctionLookup: {[n: number]: string} = {
   1: `word8bu`
 };
 
-export class BitStreamDecoder {
+export class BitStreamDecoder extends XYOBase {
 
   /**
    * A helper function to looks up the correct method to call on the binary library based on the header. It then
@@ -32,7 +33,9 @@ export class BitStreamDecoder {
     chainable[(byteToFunctionLookup[size] as string)](keyVar);
   }
 
-  constructor(private readonly buffer: Buffer) {}
+  constructor(private readonly buffer: Buffer) {
+    super();
+  }
 
   public decode(): BridgePayload {
     const extractValueFromBuffer = BitStreamDecoder.extractValueFromBuffer;

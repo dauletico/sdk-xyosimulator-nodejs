@@ -4,24 +4,19 @@
  * @Email: developer@xyfindables.com
  * @Filename: xyo-node.ts
  * @Last modified by: ryanxyo
- * @Last modified time: Tuesday, 14th August 2018 9:50:32 am
+ * @Last modified time: Tuesday, 14th August 2018 2:18:44 pm
  * @License: All Rights Reserved
  * @Copyright: Copyright XY | The Findables Company
  */
 
-import { IDiscoverable, IDiscoverableIndex } from '../types';
-import debugLib from 'debug';
+import { IDiscoverable } from '../types';
 import XYOBase from '../xyo-base';
 import { default as express, Express, Request, Response, NextFunction } from 'express';
 import { default as net, Server, Socket } from 'net';
-import { PortsContainer } from '../utils/ports-container';
 import { BitStreamDecoder } from '../utils/bit-stream-decoder';
 import Logger from '../logger';
 import { XYOComponentType } from './xyo-component-type.enum';
-import { NetworkProtocol } from '../utils/network-protocol.enum';
 import { DiscoveryDelegate } from '../services/discovery-delegate';
-
-const debug = debugLib('Node');
 
 export class XYONode extends XYOBase {
   /** If true, will continue run run-loop */
@@ -44,18 +39,19 @@ export class XYONode extends XYOBase {
   constructor(
     public readonly moniker: string,
     public readonly host: string,
-    public readonly ports: PortsContainer,
+    public readonly httpPort: number,
+    public readonly socketPort: number,
     public readonly isDiscoverable: boolean,
     private readonly discoveryDelegate: DiscoveryDelegate,
     private readonly logger: Logger
   ) {
     super();
-    this.log(`constructor`);
+    this.debug(`constructor`);
     this.httpServer = express();
-    this.httpServer.listen(this.ports.http);
+    this.httpServer.listen(this.httpPort);
     this.addHTTPRoutes();
     this.socketServer = net.createServer(this.onSocketIn.bind(this));
-    this.socketServer.listen(this.ports.socket);
+    this.socketServer.listen(this.socketPort);
   }
 
   public getType(): XYOComponentType {
@@ -74,7 +70,7 @@ export class XYONode extends XYOBase {
   }
 
   private async loop(): Promise<void> {
-    this.log(`Loop`);
+    this.debug(`Loop`);
     if (this.doLoop) {
       await this.discoveryDelegate.startDiscovering();
     }
@@ -85,7 +81,7 @@ export class XYONode extends XYOBase {
   }
 
   private addHTTPRoutes() {
-    this.log(`addHttpRoutes`);
+    this.debug(`addHttpRoutes`);
 
     /**
      * Expose http route @ GET /xyo-status
@@ -104,8 +100,8 @@ export class XYONode extends XYOBase {
       moniker: this.moniker,
       host: this.host,
       type: this.getType(),
-      socketPort: this.ports.socket,
-      httpPort: this.ports.http,
+      socketPort: this.httpPort,
+      httpPort: this.socketPort,
       peers: await this.discoveryDelegate.getPeersByType(true)
     };
   }
@@ -115,7 +111,7 @@ export class XYONode extends XYOBase {
    */
 
   private async onSocketIn(socket: Socket) {
-    this.log(`onSocketIn`);
+    this.debug(`onSocketIn`);
     let data = new Buffer([]);
 
     socket.on(`data`, (chunk) => {
@@ -129,10 +125,6 @@ export class XYONode extends XYOBase {
     });
 
     return;
-  }
-
-  private log(formatter: any, ...args: any[]): void {
-    debug(`${this.moniker}: `, formatter, ...args); // Context specific logging
   }
 }
 

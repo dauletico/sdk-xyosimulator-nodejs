@@ -4,14 +4,15 @@
  * @Email: developer@xyfindables.com
  * @Filename: network-helper.service.ts
  * @Last modified by: ryanxyo
- * @Last modified time: Monday, 13th August 2018 10:30:23 am
+ * @Last modified time: Tuesday, 14th August 2018 1:16:08 pm
  * @License: All Rights Reserved
  * @Copyright: Copyright XY | The Findables Company
  */
 
 import { networkInterfaces } from 'os';
+import { XYOBase } from '../xyo-base';
 
-export class NetworkHelperService {
+export class NetworkHelperService extends XYOBase {
 
   public getLocalIPAddress(): string | null {
     const networkMap = networkInterfaces();

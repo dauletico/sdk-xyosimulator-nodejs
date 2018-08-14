@@ -4,7 +4,7 @@
  * @Email: developer@xyfindables.com
  * @Filename: bitstream-decoder.spec.ts
  * @Last modified by: ryanxyo
- * @Last modified time: Monday, 13th August 2018 10:30:23 am
+ * @Last modified time: Tuesday, 14th August 2018 2:23:46 pm
  * @License: All Rights Reserved
  * @Copyright: Copyright XY | The Findables Company
  */
@@ -13,15 +13,10 @@ import fs from 'fs';
 import { BitStreamDecoder } from '../../src/utils/bit-stream-decoder';
 import path from 'path';
 
-import Logger from '../../src/logger';
-
 describe(`BitStreamDecoder`, () => {
   let testBuffer: Buffer;
-  let logger: Logger;
 
   beforeAll(() => {
-    logger = new Logger();
-
     const filePath = path.resolve(__dirname, '../../resources/data.BIN');
     return new Promise((resolve, reject) => {
       fs.readFile(filePath, (err, buffer) => {
